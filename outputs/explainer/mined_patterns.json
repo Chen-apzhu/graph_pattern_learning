@@ -1,0 +1,195 @@
+{
+  "method": "frequent_subgraph_mining",
+  "num_graphs": 20,
+  "patterns": [
+    {
+      "canonical": "1a2e1fd96cc3b95f",
+      "support": 20,
+      "total_occurrences": 20,
+      "percentage": 1.0,
+      "room_composition": {
+        "corridor": 1.0,
+        "classroom": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 1.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 24.07,
+      "pattern_id": "PAT_01",
+      "name": "1教室集群",
+      "summary": "[PAT_01] 1教室集群: corridor×1, classroom×1"
+    },
+    {
+      "canonical": "b8472e8e85a15017",
+      "support": 19,
+      "total_occurrences": 19,
+      "percentage": 0.95,
+      "room_composition": {
+        "corridor": 1.0,
+        "office": 1.0
+      },
+      "edge_composition": {
+        "sight_lines": 1.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 22.87,
+      "pattern_id": "PAT_02",
+      "name": "办公走廊区",
+      "summary": "[PAT_02] 办公走廊区: corridor×1, office×1"
+    },
+    {
+      "canonical": "5bb7938f696a6e8e",
+      "support": 19,
+      "total_occurrences": 19,
+      "percentage": 0.95,
+      "room_composition": {
+        "classroom": 2.0,
+        "corridor": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 2.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 22.87,
+      "pattern_id": "PAT_03",
+      "name": "2教室集群",
+      "summary": "[PAT_03] 2教室集群: classroom×2, corridor×1"
+    },
+    {
+      "canonical": "d302f2976a1da92a",
+      "support": 19,
+      "total_occurrences": 19,
+      "percentage": 0.95,
+      "room_composition": {
+        "corridor": 1.0,
+        "classroom": 4.0
+      },
+      "edge_composition": {
+        "physical_connects": 4.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 22.87,
+      "pattern_id": "PAT_04",
+      "name": "4教室集群",
+      "summary": "[PAT_04] 4教室集群: classroom×4, corridor×1"
+    },
+    {
+      "canonical": "9f1cb028f3981f58",
+      "support": 19,
+      "total_occurrences": 19,
+      "percentage": 0.95,
+      "room_composition": {
+        "corridor": 1.0,
+        "special": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 1.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 22.87,
+      "pattern_id": "PAT_05",
+      "name": "走道·special组合",
+      "summary": "[PAT_05] 走道·special组合: corridor×1, special×1"
+    },
+    {
+      "canonical": "b33549df8fa65d1e",
+      "support": 20,
+      "total_occurrences": 20,
+      "percentage": 1.0,
+      "room_composition": {
+        "corridor": 2.0
+      },
+      "edge_composition": {
+        "physical_connects": 1.0
+      },
+      "avg_score": 0.003,
+      "diversity": 1,
+      "rank": 22.06,
+      "pattern_id": "PAT_06",
+      "name": "走道组合",
+      "summary": "[PAT_06] 走道组合: corridor×2"
+    },
+    {
+      "canonical": "b5b303e0015bcbc9",
+      "support": 18,
+      "total_occurrences": 18,
+      "percentage": 0.9,
+      "room_composition": {
+        "classroom": 1.0,
+        "corridor": 2.0
+      },
+      "edge_composition": {
+        "physical_connects": 3.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 21.66,
+      "pattern_id": "PAT_07",
+      "name": "1教室集群",
+      "summary": "[PAT_07] 1教室集群: corridor×2, classroom×1"
+    },
+    {
+      "canonical": "66d7c61e07ba775c",
+      "support": 17,
+      "total_occurrences": 17,
+      "percentage": 0.85,
+      "room_composition": {
+        "classroom": 3.0,
+        "corridor": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 3.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 20.46,
+      "pattern_id": "PAT_08",
+      "name": "3教室集群",
+      "summary": "[PAT_08] 3教室集群: classroom×3, corridor×1"
+    },
+    {
+      "canonical": "6679ca7569cbdbc4",
+      "support": 17,
+      "total_occurrences": 17,
+      "percentage": 0.85,
+      "room_composition": {
+        "toilet": 1.0,
+        "corridor": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 1.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 20.46,
+      "pattern_id": "PAT_09",
+      "name": "卫生间·走道组合",
+      "summary": "[PAT_09] 卫生间·走道组合: toilet×1, corridor×1"
+    },
+    {
+      "canonical": "6399ec1899a73134",
+      "support": 16,
+      "total_occurrences": 16,
+      "percentage": 0.8,
+      "room_composition": {
+        "classroom": 5.0,
+        "corridor": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 5.0
+      },
+      "avg_score": 0.003,
+      "diversity": 2,
+      "rank": 19.26,
+      "pattern_id": "PAT_10",
+      "name": "5教室集群",
+      "summary": "[PAT_10] 5教室集群: classroom×5, corridor×1"
+    }
+  ]
+}

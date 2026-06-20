@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68.0"]
+build-backend = "setuptools.backends._backends.setuptools"
+
+[project]
+name = "graph-pattern-learning"
+version = "0.1.0"
+description = "基于多模态异构图与子图解释器的可解释性建筑布局生成与模式提取 — Phase 1: 数据生成与图表征"
+authors = [
+    {name = "Chen-apzhu"}
+]
+requires-python = ">=3.10"
+dependencies = [
+    "torch>=2.0.0",
+    "torch-geometric>=2.4.0",
+    "networkx>=3.1",
+    "numpy>=1.24.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]

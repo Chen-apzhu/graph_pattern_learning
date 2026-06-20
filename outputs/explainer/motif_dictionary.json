@@ -1,0 +1,2961 @@
+{
+  "generated_at": "2026-06-18T01:17:42.453689",
+  "metadata": {
+    "dataset": "outputs/dataset_200_new",
+    "num_subgraphs": 15,
+    "n_clusters": 8
+  },
+  "num_motifs": 3,
+  "motifs": [
+    {
+      "motif_id": "MOTIF_01",
+      "name": "教学翼标准模体",
+      "room_composition": {
+        "library": 1.0,
+        "office": 5.0,
+        "corridor": 13.75,
+        "staircase": 4.5,
+        "toilet": 7.5,
+        "cafeteria": 1.0,
+        "entrance": 1.0,
+        "classroom": 15.75,
+        "special": 2.0,
+        "music": 1.75,
+        "teacher": 2.75,
+        "storage": 3.0,
+        "env": 5.0,
+        "gymnasium": 1.0
+      },
+      "edge_composition": {
+        "acoustic_blocks": 3.3333333333333335,
+        "physical_connects": 73.5,
+        "sight_lines": 9.0
+      },
+      "frequency": 4,
+      "percentage": 0.2667,
+      "avg_nodes": 64.2,
+      "related_constraints": [
+        "GB50099-2011 §5.1 采光",
+        "GB50016-2014 §5.5.17 疏散",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50099-2011 §7.3 声学",
+        "GB50016-2014 §5.5 消防"
+      ],
+      "description": "该模体由普通教室15间, 走道13间, 卫生间7间, 行政办公室5间, env5间组成，平均14类房间、64个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。",
+      "centroid_graph": {
+        "nodes": [
+          {
+            "id": "room_2",
+            "room_id": "library_002_G0",
+            "room_type": "library"
+          },
+          {
+            "id": "room_3",
+            "room_id": "office_016_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_4",
+            "room_id": "office_017_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_5",
+            "room_id": "office_018_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_7",
+            "room_id": "office_020_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_9",
+            "room_id": "office_022_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_11",
+            "room_id": "corridor_026_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_12",
+            "room_id": "corridor_027_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_13",
+            "room_id": "corridor_028_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_14",
+            "room_id": "corridor_029_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_15",
+            "room_id": "staircase_008_G0",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_16",
+            "room_id": "toilet_024_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_17",
+            "room_id": "toilet_025_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_21",
+            "room_id": "cafeteria_002_G0",
+            "room_type": "cafeteria"
+          },
+          {
+            "id": "room_22",
+            "room_id": "entrance_hall_002_G0",
+            "room_type": "entrance"
+          },
+          {
+            "id": "room_23",
+            "room_id": "classroom_048_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_24",
+            "room_id": "classroom_049_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_26",
+            "room_id": "classroom_051_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_27",
+            "room_id": "classroom_052_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_30",
+            "room_id": "classroom_055_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_31",
+            "room_id": "classroom_056_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_33",
+            "room_id": "classroom_058_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_36",
+            "room_id": "classroom_061_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_37",
+            "room_id": "classroom_062_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_38",
+            "room_id": "classroom_063_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_39",
+            "room_id": "classroom_064_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_40",
+            "room_id": "classroom_065_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_42",
+            "room_id": "classroom_067_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_43",
+            "room_id": "classroom_068_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_44",
+            "room_id": "classroom_069_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_45",
+            "room_id": "classroom_070_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_46",
+            "room_id": "classroom_071_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_47",
+            "room_id": "special_classroom_007_T1",
+            "room_type": "special"
+          },
+          {
+            "id": "room_48",
+            "room_id": "special_classroom_008_T1",
+            "room_type": "special"
+          },
+          {
+            "id": "room_49",
+            "room_id": "music_room_004_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_50",
+            "room_id": "music_room_005_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_51",
+            "room_id": "teacher_office_008_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_53",
+            "room_id": "teacher_office_010_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_54",
+            "room_id": "teacher_office_011_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_55",
+            "room_id": "corridor_030_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_56",
+            "room_id": "corridor_031_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_57",
+            "room_id": "corridor_032_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_58",
+            "room_id": "corridor_033_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_59",
+            "room_id": "corridor_034_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_60",
+            "room_id": "corridor_035_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_61",
+            "room_id": "corridor_036_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_62",
+            "room_id": "corridor_037_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_63",
+            "room_id": "corridor_038_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_64",
+            "room_id": "staircase_009_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_65",
+            "room_id": "staircase_010_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_66",
+            "room_id": "staircase_011_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_67",
+            "room_id": "toilet_028_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_68",
+            "room_id": "toilet_029_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_70",
+            "room_id": "toilet_031_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_71",
+            "room_id": "toilet_032_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_72",
+            "room_id": "toilet_033_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_73",
+            "room_id": "toilet_034_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_76",
+            "room_id": "storage_010_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "env_0",
+            "room_id": "env_0",
+            "room_type": "env"
+          },
+          {
+            "id": "env_1",
+            "room_id": "env_1",
+            "room_type": "env"
+          },
+          {
+            "id": "env_2",
+            "room_id": "env_2",
+            "room_type": "env"
+          },
+          {
+            "id": "env_3",
+            "room_id": "env_3",
+            "room_type": "env"
+          },
+          {
+            "id": "env_4",
+            "room_id": "env_4",
+            "room_type": "env"
+          }
+        ],
+        "edges": [
+          {
+            "source": "room_2",
+            "target": "room_13",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_2",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_3",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_4",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_5",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_7",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_9",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_11",
+            "target": "room_16",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_11",
+            "target": "room_21",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_11",
+            "target": "room_12",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_12",
+            "target": "room_17",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_12",
+            "target": "room_21",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_12",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_13",
+            "target": "room_22",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_13",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_14",
+            "target": "room_15",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_14",
+            "target": "room_22",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_64",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_65",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_66",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_59",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_26",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_26",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_27",
+            "target": "room_56",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_27",
+            "target": "room_61",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_30",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_30",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_31",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_33",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_33",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_36",
+            "target": "room_56",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_36",
+            "target": "room_61",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_37",
+            "target": "room_60",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_38",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_39",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_40",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_42",
+            "target": "room_57",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_43",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_43",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_44",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_44",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_45",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_45",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_46",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_59",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_57",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_63",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_49",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_68",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_50",
+            "target": "room_63",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_50",
+            "target": "room_55",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_50",
+            "target": "room_67",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_51",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_53",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_54",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_55",
+            "target": "room_66",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_55",
+            "target": "room_60",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_55",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_61",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_57",
+            "target": "room_59",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_57",
+            "target": "room_60",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_64",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_70",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_72",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_73",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_62",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_59",
+            "target": "room_61",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_60",
+            "target": "room_67",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_61",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_62",
+            "target": "room_71",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_63",
+            "target": "room_65",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_63",
+            "target": "room_66",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_63",
+            "target": "room_68",
+            "edge_type": "physical_connects"
+          }
+        ]
+      }
+    },
+    {
+      "motif_id": "MOTIF_02",
+      "name": "教学翼标准模体",
+      "room_composition": {
+        "special": 2.0,
+        "gymnasium": 1.0,
+        "office": 4.333333333333333,
+        "corridor": 14.0,
+        "staircase": 4.666666666666667,
+        "toilet": 6.666666666666667,
+        "storage": 3.3333333333333335,
+        "entrance": 1.0,
+        "classroom": 16.333333333333332,
+        "music": 1.6666666666666667,
+        "teacher": 3.6666666666666665,
+        "env": 5.0,
+        "library": 1.0,
+        "cafeteria": 1.0
+      },
+      "edge_composition": {
+        "physical_connects": 72.33333333333333,
+        "sight_lines": 8.666666666666666,
+        "acoustic_blocks": 12.0
+      },
+      "frequency": 3,
+      "percentage": 0.2,
+      "avg_nodes": 64.7,
+      "related_constraints": [
+        "GB50099-2011 §5.1 采光",
+        "GB50016-2014 §5.5.17 疏散",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50099-2011 §7.3 声学",
+        "GB50016-2014 §5.5 消防"
+      ],
+      "description": "该模体由普通教室16间, 走道14间, 卫生间6间, env5间, 楼梯间4间组成，平均14类房间、65个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。",
+      "centroid_graph": {
+        "nodes": [
+          {
+            "id": "room_1",
+            "room_id": "gymnasium_000_G0",
+            "room_type": "gymnasium"
+          },
+          {
+            "id": "room_2",
+            "room_id": "library_000_G0",
+            "room_type": "library"
+          },
+          {
+            "id": "room_3",
+            "room_id": "office_000_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_4",
+            "room_id": "office_001_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_5",
+            "room_id": "office_002_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_8",
+            "room_id": "office_005_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_10",
+            "room_id": "office_007_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_11",
+            "room_id": "corridor_000_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_12",
+            "room_id": "corridor_001_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_13",
+            "room_id": "corridor_002_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_14",
+            "room_id": "corridor_003_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_15",
+            "room_id": "staircase_000_G0",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_16",
+            "room_id": "toilet_000_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_17",
+            "room_id": "toilet_001_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_18",
+            "room_id": "storage_000_G0",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_19",
+            "room_id": "cafeteria_000_G0",
+            "room_type": "cafeteria"
+          },
+          {
+            "id": "room_20",
+            "room_id": "entrance_hall_000_G0",
+            "room_type": "entrance"
+          },
+          {
+            "id": "room_21",
+            "room_id": "classroom_000_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_22",
+            "room_id": "classroom_001_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_23",
+            "room_id": "classroom_002_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_24",
+            "room_id": "classroom_003_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_27",
+            "room_id": "classroom_006_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_29",
+            "room_id": "classroom_008_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_30",
+            "room_id": "classroom_009_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_31",
+            "room_id": "classroom_010_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_32",
+            "room_id": "classroom_011_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_33",
+            "room_id": "classroom_012_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_34",
+            "room_id": "classroom_013_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_35",
+            "room_id": "classroom_014_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_38",
+            "room_id": "classroom_017_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_40",
+            "room_id": "special_classroom_001_T1",
+            "room_type": "special"
+          },
+          {
+            "id": "room_42",
+            "room_id": "music_room_001_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_43",
+            "room_id": "teacher_office_000_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_44",
+            "room_id": "teacher_office_001_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_46",
+            "room_id": "teacher_office_003_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_47",
+            "room_id": "corridor_004_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_48",
+            "room_id": "corridor_005_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_49",
+            "room_id": "corridor_006_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_50",
+            "room_id": "corridor_007_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_51",
+            "room_id": "corridor_008_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_52",
+            "room_id": "corridor_009_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_53",
+            "room_id": "corridor_010_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_54",
+            "room_id": "corridor_011_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_55",
+            "room_id": "corridor_012_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_56",
+            "room_id": "staircase_001_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_57",
+            "room_id": "staircase_002_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_58",
+            "room_id": "staircase_003_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_59",
+            "room_id": "staircase_004_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_63",
+            "room_id": "toilet_005_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_64",
+            "room_id": "toilet_006_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_67",
+            "room_id": "toilet_009_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_68",
+            "room_id": "storage_001_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_69",
+            "room_id": "storage_002_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_72",
+            "room_id": "classroom_021_P5",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_73",
+            "room_id": "classroom_022_P5",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_74",
+            "room_id": "classroom_023_P5",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_75",
+            "room_id": "special_classroom_002_P5",
+            "room_type": "special"
+          },
+          {
+            "id": "room_76",
+            "room_id": "corridor_013_P5",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_77",
+            "room_id": "corridor_014_P5",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_78",
+            "room_id": "corridor_015_P5",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_79",
+            "room_id": "staircase_005_P5",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_80",
+            "room_id": "toilet_010_P5",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_82",
+            "room_id": "storage_003_P5",
+            "room_type": "storage"
+          },
+          {
+            "id": "env_0",
+            "room_id": "env_0",
+            "room_type": "env"
+          },
+          {
+            "id": "env_1",
+            "room_id": "env_1",
+            "room_type": "env"
+          },
+          {
+            "id": "env_2",
+            "room_id": "env_2",
+            "room_type": "env"
+          },
+          {
+            "id": "env_3",
+            "room_id": "env_3",
+            "room_type": "env"
+          },
+          {
+            "id": "env_4",
+            "room_id": "env_4",
+            "room_type": "env"
+          }
+        ],
+        "edges": [
+          {
+            "source": "room_1",
+            "target": "room_12",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_1",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_1",
+            "target": "room_19",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_2",
+            "target": "room_12",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_2",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_3",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_4",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_5",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_8",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_10",
+            "target": "room_13",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_11",
+            "target": "room_15",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_11",
+            "target": "room_18",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_11",
+            "target": "room_20",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_11",
+            "target": "room_13",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_11",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_12",
+            "target": "room_16",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_12",
+            "target": "room_19",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_12",
+            "target": "room_14",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_13",
+            "target": "room_20",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_14",
+            "target": "room_15",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_14",
+            "target": "room_17",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_14",
+            "target": "room_18",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_14",
+            "target": "room_19",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_56",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_57",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_15",
+            "target": "room_59",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_21",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_51",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_52",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_54",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_27",
+            "target": "room_54",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_27",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_29",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_30",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_30",
+            "target": "room_54",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_31",
+            "target": "room_51",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_31",
+            "target": "room_52",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_32",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_32",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_33",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_34",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_34",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_35",
+            "target": "room_48",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_38",
+            "target": "room_51",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_38",
+            "target": "room_52",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_40",
+            "target": "room_53",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_40",
+            "target": "room_50",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_42",
+            "target": "room_54",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_42",
+            "target": "room_49",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_42",
+            "target": "room_50",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_42",
+            "target": "room_53",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_42",
+            "target": "room_55",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_43",
+            "target": "room_51",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_44",
+            "target": "room_49",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_44",
+            "target": "room_48",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_44",
+            "target": "room_54",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_46",
+            "target": "room_51",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_46",
+            "target": "room_47",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_46",
+            "target": "room_52",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_47",
+            "target": "room_63",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_52",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_57",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_59",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_64",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_67",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_69",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_49",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_57",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_69",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_54",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_50",
+            "target": "room_55",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_50",
+            "target": "room_53",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_51",
+            "target": "room_56",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_51",
+            "target": "room_68",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_51",
+            "target": "room_52",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_52",
+            "target": "room_68",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_53",
+            "target": "room_54",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_54",
+            "target": "room_58",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_57",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_58",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_59",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_72",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_72",
+            "target": "room_78",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_73",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_73",
+            "target": "room_78",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_74",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_75",
+            "target": "room_76",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_75",
+            "target": "room_78",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_76",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_76",
+            "target": "room_78",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_77",
+            "target": "room_80",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_77",
+            "target": "room_82",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_77",
+            "target": "room_78",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_78",
+            "target": "room_79",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_78",
+            "target": "room_82",
+            "edge_type": "physical_connects"
+          }
+        ]
+      }
+    },
+    {
+      "motif_id": "MOTIF_03",
+      "name": "教学翼标准模体",
+      "room_composition": {
+        "gymnasium": 1.5,
+        "library": 1.3333333333333333,
+        "office": 6.666666666666667,
+        "corridor": 18.0,
+        "staircase": 6.0,
+        "toilet": 8.666666666666666,
+        "storage": 3.6666666666666665,
+        "entrance": 1.0,
+        "classroom": 21.333333333333332,
+        "special": 2.0,
+        "music": 2.5,
+        "teacher": 4.0,
+        "env": 5.333333333333333
+      },
+      "edge_composition": {
+        "sight_lines": 10.333333333333334,
+        "physical_connects": 93.66666666666667,
+        "acoustic_blocks": 5.333333333333333
+      },
+      "frequency": 3,
+      "percentage": 0.2,
+      "avg_nodes": 80.7,
+      "related_constraints": [
+        "GB50099-2011 §5.1 采光",
+        "GB50016-2014 §5.5.17 疏散",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50099-2011 §7.3 声学",
+        "GB50016-2014 §5.5 消防"
+      ],
+      "description": "该模体由普通教室21间, 走道18间, 卫生间8间, 行政办公室6间, 楼梯间6间组成，平均13类房间、81个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。",
+      "centroid_graph": {
+        "nodes": [
+          {
+            "id": "room_1",
+            "room_id": "gymnasium_000_G0",
+            "room_type": "gymnasium"
+          },
+          {
+            "id": "room_2",
+            "room_id": "gymnasium_001_G0",
+            "room_type": "gymnasium"
+          },
+          {
+            "id": "room_3",
+            "room_id": "library_000_G0",
+            "room_type": "library"
+          },
+          {
+            "id": "room_6",
+            "room_id": "office_002_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_7",
+            "room_id": "office_003_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_8",
+            "room_id": "office_004_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_9",
+            "room_id": "office_005_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_10",
+            "room_id": "office_006_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_11",
+            "room_id": "office_007_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_12",
+            "room_id": "office_008_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_13",
+            "room_id": "office_009_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_14",
+            "room_id": "office_010_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_15",
+            "room_id": "office_011_G0",
+            "room_type": "office"
+          },
+          {
+            "id": "room_16",
+            "room_id": "corridor_000_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_17",
+            "room_id": "corridor_001_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_18",
+            "room_id": "corridor_002_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_19",
+            "room_id": "corridor_003_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_20",
+            "room_id": "corridor_004_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_21",
+            "room_id": "corridor_005_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_22",
+            "room_id": "corridor_006_G0",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_23",
+            "room_id": "staircase_000_G0",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_24",
+            "room_id": "staircase_001_G0",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_25",
+            "room_id": "toilet_000_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_26",
+            "room_id": "toilet_001_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_27",
+            "room_id": "toilet_002_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_28",
+            "room_id": "toilet_003_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_29",
+            "room_id": "toilet_004_G0",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_31",
+            "room_id": "storage_000_G0",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_32",
+            "room_id": "storage_001_G0",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_34",
+            "room_id": "entrance_hall_000_G0",
+            "room_type": "entrance"
+          },
+          {
+            "id": "room_37",
+            "room_id": "classroom_002_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_38",
+            "room_id": "classroom_003_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_39",
+            "room_id": "classroom_004_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_40",
+            "room_id": "classroom_005_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_44",
+            "room_id": "classroom_009_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_45",
+            "room_id": "classroom_010_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_46",
+            "room_id": "classroom_011_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_47",
+            "room_id": "classroom_012_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_48",
+            "room_id": "classroom_013_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_49",
+            "room_id": "classroom_014_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_50",
+            "room_id": "classroom_015_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_52",
+            "room_id": "classroom_017_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_53",
+            "room_id": "classroom_018_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_54",
+            "room_id": "classroom_019_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_55",
+            "room_id": "classroom_020_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_56",
+            "room_id": "classroom_021_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_57",
+            "room_id": "classroom_022_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_59",
+            "room_id": "classroom_024_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_60",
+            "room_id": "classroom_025_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_61",
+            "room_id": "classroom_026_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_62",
+            "room_id": "classroom_027_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_63",
+            "room_id": "classroom_028_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_64",
+            "room_id": "classroom_029_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_66",
+            "room_id": "classroom_031_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_67",
+            "room_id": "classroom_032_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_68",
+            "room_id": "classroom_033_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_70",
+            "room_id": "classroom_035_T1",
+            "room_type": "classroom"
+          },
+          {
+            "id": "room_73",
+            "room_id": "special_classroom_003_T1",
+            "room_type": "special"
+          },
+          {
+            "id": "room_74",
+            "room_id": "special_classroom_004_T1",
+            "room_type": "special"
+          },
+          {
+            "id": "room_75",
+            "room_id": "music_room_000_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_76",
+            "room_id": "music_room_001_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_77",
+            "room_id": "music_room_002_T1",
+            "room_type": "music"
+          },
+          {
+            "id": "room_78",
+            "room_id": "library_001_T1",
+            "room_type": "library"
+          },
+          {
+            "id": "room_79",
+            "room_id": "teacher_office_000_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_80",
+            "room_id": "teacher_office_001_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_81",
+            "room_id": "teacher_office_002_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_82",
+            "room_id": "teacher_office_003_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_84",
+            "room_id": "teacher_office_005_T1",
+            "room_type": "teacher"
+          },
+          {
+            "id": "room_85",
+            "room_id": "corridor_007_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_86",
+            "room_id": "corridor_008_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_87",
+            "room_id": "corridor_009_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_88",
+            "room_id": "corridor_010_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_89",
+            "room_id": "corridor_011_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_90",
+            "room_id": "corridor_012_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_91",
+            "room_id": "corridor_013_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_92",
+            "room_id": "corridor_014_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_93",
+            "room_id": "corridor_015_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_94",
+            "room_id": "corridor_016_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_95",
+            "room_id": "corridor_017_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_96",
+            "room_id": "corridor_018_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_97",
+            "room_id": "corridor_019_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_98",
+            "room_id": "corridor_020_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_99",
+            "room_id": "corridor_021_T1",
+            "room_type": "corridor"
+          },
+          {
+            "id": "room_100",
+            "room_id": "staircase_002_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_101",
+            "room_id": "staircase_003_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_102",
+            "room_id": "staircase_004_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_103",
+            "room_id": "staircase_005_T1",
+            "room_type": "staircase"
+          },
+          {
+            "id": "room_104",
+            "room_id": "toilet_006_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_106",
+            "room_id": "toilet_008_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_107",
+            "room_id": "toilet_009_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_108",
+            "room_id": "toilet_010_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_109",
+            "room_id": "toilet_011_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_111",
+            "room_id": "toilet_013_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_113",
+            "room_id": "toilet_015_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_114",
+            "room_id": "toilet_016_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_115",
+            "room_id": "toilet_017_T1",
+            "room_type": "toilet"
+          },
+          {
+            "id": "room_116",
+            "room_id": "storage_002_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_117",
+            "room_id": "storage_003_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_118",
+            "room_id": "storage_004_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "room_119",
+            "room_id": "storage_005_T1",
+            "room_type": "storage"
+          },
+          {
+            "id": "env_0",
+            "room_id": "env_0",
+            "room_type": "env"
+          },
+          {
+            "id": "env_1",
+            "room_id": "env_1",
+            "room_type": "env"
+          },
+          {
+            "id": "env_2",
+            "room_id": "env_2",
+            "room_type": "env"
+          },
+          {
+            "id": "env_3",
+            "room_id": "env_3",
+            "room_type": "env"
+          },
+          {
+            "id": "env_4",
+            "room_id": "env_4",
+            "room_type": "env"
+          },
+          {
+            "id": "env_5",
+            "room_id": "env_5",
+            "room_type": "env"
+          }
+        ],
+        "edges": [
+          {
+            "source": "room_1",
+            "target": "room_20",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_1",
+            "target": "room_19",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_1",
+            "target": "room_2",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_2",
+            "target": "room_20",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_2",
+            "target": "room_19",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_3",
+            "target": "room_21",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_3",
+            "target": "room_19",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_3",
+            "target": "room_17",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_3",
+            "target": "room_20",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_6",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_7",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_8",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_9",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_10",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_11",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_12",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_13",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_14",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_15",
+            "target": "room_18",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_16",
+            "target": "room_23",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_16",
+            "target": "room_32",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_16",
+            "target": "room_18",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_16",
+            "target": "room_22",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_17",
+            "target": "room_22",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_17",
+            "target": "room_21",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_18",
+            "target": "room_24",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_18",
+            "target": "room_26",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_18",
+            "target": "room_27",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_18",
+            "target": "room_34",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_19",
+            "target": "room_31",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_19",
+            "target": "room_21",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_19",
+            "target": "room_20",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_20",
+            "target": "room_31",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_23",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_25",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_28",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_29",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_32",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_22",
+            "target": "room_34",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_100",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_101",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_102",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_23",
+            "target": "room_103",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_100",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_101",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_102",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_24",
+            "target": "room_103",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_37",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_37",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_38",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_38",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_39",
+            "target": "room_98",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_39",
+            "target": "room_97",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_40",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_44",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_45",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_45",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_46",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_46",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_47",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_48",
+            "target": "room_85",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_49",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_50",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_50",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_52",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_52",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_53",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_54",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_54",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_55",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_55",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_56",
+            "target": "room_90",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_57",
+            "target": "room_96",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_57",
+            "target": "room_87",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_59",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_59",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_60",
+            "target": "room_90",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_61",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_62",
+            "target": "room_92",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_63",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_63",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_64",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_64",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_66",
+            "target": "room_92",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_66",
+            "target": "room_98",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_67",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_68",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_68",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_70",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_70",
+            "target": "room_90",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_73",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_74",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_74",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_75",
+            "target": "room_86",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_75",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_76",
+            "target": "room_97",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_76",
+            "target": "room_98",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_76",
+            "target": "room_77",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_76",
+            "target": "room_106",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_77",
+            "target": "room_98",
+            "edge_type": "sight_lines"
+          },
+          {
+            "source": "room_77",
+            "target": "room_106",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_78",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_78",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_79",
+            "target": "room_96",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_79",
+            "target": "room_87",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_79",
+            "target": "room_92",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_79",
+            "target": "room_95",
+            "edge_type": "acoustic_blocks"
+          },
+          {
+            "source": "room_80",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_81",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_82",
+            "target": "room_99",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_84",
+            "target": "room_86",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_85",
+            "target": "room_99",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_85",
+            "target": "room_89",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_101",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_103",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_104",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_107",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_114",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_116",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_117",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_119",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_86",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_87",
+            "target": "room_111",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_87",
+            "target": "room_96",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_87",
+            "target": "room_95",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_88",
+            "target": "room_118",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_88",
+            "target": "room_94",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_88",
+            "target": "room_97",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_89",
+            "target": "room_94",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_90",
+            "target": "room_109",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_90",
+            "target": "room_91",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_90",
+            "target": "room_99",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_91",
+            "target": "room_102",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_91",
+            "target": "room_93",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_92",
+            "target": "room_100",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_92",
+            "target": "room_98",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_92",
+            "target": "room_96",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_93",
+            "target": "room_102",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_93",
+            "target": "room_108",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_93",
+            "target": "room_113",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_94",
+            "target": "room_118",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_95",
+            "target": "room_116",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_95",
+            "target": "room_117",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_95",
+            "target": "room_119",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_97",
+            "target": "room_98",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_98",
+            "target": "room_106",
+            "edge_type": "physical_connects"
+          },
+          {
+            "source": "room_99",
+            "target": "room_115",
+            "edge_type": "physical_connects"
+          }
+        ]
+      }
+    }
+  ]
+}

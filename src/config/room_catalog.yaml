@@ -1,0 +1,159 @@
+# Room Type Catalog — 房间类型定义
+# ================================
+# Defines the parametric specification for each room type in a school building.
+# References: GB50099-2011 (中小学设计规范), GB50016-2014 (建筑设计防火规范)
+#
+# Each entry defines:
+#   display_name        — Chinese display name
+#   area_range_sqm      — [min, max] expected floor area in m²
+#   aspect_ratio_range  — [min, max] width:depth ratio
+#   daylight_level      — DaylightLevel enum value
+#   noise_level         — NoiseLevel enum value (emission)
+#   noise_tolerance     — NoiseLevel enum value (what it can tolerate nearby)
+#   occupancy_density   — m² per person (for occupancy estimation, §4 前置规则富化)
+#   fire_exits_min      — minimum physical connection edges (§4 硬约束, 消防疏散)
+#   floor_preference    — preferred floor numbers (0 = ground)
+
+room_types:
+  classroom:
+    display_name: "普通教室"
+    area_range_sqm: [54.0, 72.0]
+    aspect_ratio_range: [1.0, 1.8]
+    daylight_level: HIGH
+    noise_level: MODERATE
+    noise_tolerance: MODERATE
+    occupancy_density: 1.2
+    fire_exits_min: 2
+    floor_preference: [1, 2, 3]
+
+  special_classroom:
+    display_name: "专用教室"
+    area_range_sqm: [72.0, 96.0]
+    aspect_ratio_range: [1.0, 1.8]
+    daylight_level: HIGH
+    noise_level: MODERATE
+    noise_tolerance: MODERATE
+    occupancy_density: 1.5
+    fire_exits_min: 2
+    floor_preference: [1, 2, 3]
+
+  music_room:
+    display_name: "音乐教室"
+    area_range_sqm: [72.0, 90.0]
+    aspect_ratio_range: [1.0, 1.6]
+    daylight_level: MEDIUM
+    noise_level: LOUD
+    noise_tolerance: QUIET
+    occupancy_density: 1.5
+    fire_exits_min: 2
+    floor_preference: [0, 1]
+
+  gymnasium:
+    display_name: "体育馆"
+    area_range_sqm: [400.0, 800.0]
+    aspect_ratio_range: [1.4, 2.0]
+    daylight_level: MEDIUM
+    noise_level: VERY_LOUD
+    noise_tolerance: QUIET
+    occupancy_density: 3.0
+    fire_exits_min: 3
+    floor_preference: [0]
+
+  library:
+    display_name: "图书馆"
+    area_range_sqm: [100.0, 200.0]
+    aspect_ratio_range: [1.0, 2.5]
+    daylight_level: HIGH
+    noise_level: QUIET
+    noise_tolerance: QUIET
+    occupancy_density: 2.0
+    fire_exits_min: 2
+    floor_preference: [0, 1]
+
+  office:
+    display_name: "行政办公室"
+    area_range_sqm: [15.0, 30.0]
+    aspect_ratio_range: [1.0, 2.0]
+    daylight_level: MEDIUM
+    noise_level: MODERATE
+    noise_tolerance: MODERATE
+    occupancy_density: 4.0
+    fire_exits_min: 1
+    floor_preference: [0, 1]
+
+  teacher_office:
+    display_name: "教师办公室"
+    area_range_sqm: [30.0, 60.0]
+    aspect_ratio_range: [1.0, 2.0]
+    daylight_level: HIGH
+    noise_level: MODERATE
+    noise_tolerance: QUIET
+    occupancy_density: 3.0
+    fire_exits_min: 1
+    floor_preference: [1, 2, 3]
+
+  corridor:
+    display_name: "走道"
+    area_range_sqm: [12.0, 48.0]
+    aspect_ratio_range: [3.0, 12.0]
+    daylight_level: LOW
+    noise_level: NOISY
+    noise_tolerance: LOUD
+    occupancy_density: 0.3
+    fire_exits_min: 2
+    floor_preference: [0, 1, 2, 3, 4]
+
+  staircase:
+    display_name: "楼梯间"
+    area_range_sqm: [18.0, 30.0]
+    aspect_ratio_range: [1.0, 2.0]
+    daylight_level: NONE
+    noise_level: MODERATE
+    noise_tolerance: LOUD
+    occupancy_density: 0.5
+    fire_exits_min: 2
+    floor_preference: [0, 1, 2, 3, 4]
+
+  toilet:
+    display_name: "卫生间"
+    area_range_sqm: [12.0, 24.0]
+    aspect_ratio_range: [1.0, 2.5]
+    daylight_level: NONE
+    noise_level: MODERATE
+    noise_tolerance: MODERATE
+    occupancy_density: 0.8
+    fire_exits_min: 1
+    floor_preference: [0, 1, 2, 3, 4]
+
+  storage:
+    display_name: "储藏室"
+    area_range_sqm: [6.0, 15.0]
+    aspect_ratio_range: [1.0, 3.0]
+    daylight_level: NONE
+    noise_level: QUIET
+    noise_tolerance: LOUD
+    occupancy_density: 0.1
+    fire_exits_min: 1
+    floor_preference: [0, 1, 2, 3, 4]
+
+  cafeteria:
+    display_name: "食堂"
+    area_range_sqm: [200.0, 400.0]
+    aspect_ratio_range: [1.0, 2.5]
+    daylight_level: MEDIUM
+    noise_level: NOISY
+    noise_tolerance: NOISY
+    occupancy_density: 1.0
+    fire_exits_min: 3
+    floor_preference: [0]
+
+  entrance_hall:
+    display_name: "门厅"
+    area_range_sqm: [40.0, 80.0]
+    aspect_ratio_range: [1.0, 3.0]
+    daylight_level: MEDIUM
+    noise_level: NOISY
+    noise_tolerance: LOUD
+    occupancy_density: 0.5
+    fire_exits_min: 2
+    floor_preference: [0]

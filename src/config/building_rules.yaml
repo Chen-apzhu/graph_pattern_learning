@@ -1,0 +1,188 @@
+# Building Design Rules & Constraint Parameters
+# ==============================================
+# Configurable thresholds and parameters for all building code constraints.
+# References: GB50099-2011, GB50016-2014
+#
+# All values are tunable — changing them here adjusts constraint behavior
+# without modifying any Python code.
+
+# --- Fire Safety (§4 硬约束, 消防疏散) ---
+fire_safety:
+  occupancy_threshold: 50          # Minimum occupancy to trigger multi-exit requirement
+  min_fire_exit_degree: 2          # Minimum degree in physical graph for high-occupancy rooms
+  staircase_required_per_floor: 2  # Minimum staircases per floor (GB50016-2014 §5.5)
+
+# --- Daylight Compliance (§4 软约束, 采光) ---
+daylight:
+  high_requirement_min_edges: 1    # Rooms with daylight_level >= HIGH must have >= this many sight_line edges
+  south_orientation_weight: 0.8    # Weight bonus for south-facing connections
+
+# --- Acoustic Separation (§4 硬约束, 声学) ---
+acoustic:
+  noise_gap_threshold: 2           # noise_level(r1) - noise_tolerance(r2) >= this triggers separation
+  min_path_distance: 2             # Minimum shortest-path distance if no acoustic_blocks edge
+  proximity_threshold: 15.0        # Distance (m) within which noisy/quiet rooms are checked
+  default_attenuation_db: 45.0     # Default sound attenuation for acoustic_blocks edges
+  music_classroom_attenuation_db: 55.0  # Higher attenuation for music↔classroom adjacencies
+
+# --- Connectivity (§4 硬约束, 连通性) ---
+connectivity:
+  physical_graph_must_be_connected: true  # Physical connection subgraph must be fully connected
+  stair_connection_min: 1          # Every room must have a path to at least this many staircases
+
+# --- Topology Generation Parameters ---
+topology:
+  corridor_segment_length: 10.0    # Typical length of a corridor segment (m)
+  staircase_spacing: 30.0          # Max distance between staircases (m)
+  teaching_wing_depth: 16.0        # Typical depth of a teaching wing (m)
+  floor_height: 3.9                # Floor-to-floor height (m)
+
+# --- School Size Templates ---
+# Room counts for small / medium / large school configurations
+school_sizes:
+  small:   # ~12 classes, ~300 students
+    classroom: 12
+    special_classroom: 2
+    music_room: 1
+    gymnasium: 1
+    library: 1
+    office: 4
+    teacher_office: 2
+    corridor: 8
+    staircase: 3
+    toilet: 6
+    storage: 2
+    cafeteria: 1
+    entrance_hall: 1
+
+  medium:  # ~24 classes, ~600 students
+    classroom: 24
+    special_classroom: 3
+    music_room: 2
+    gymnasium: 1
+    library: 1
+    office: 8
+    teacher_office: 4
+    corridor: 14
+    staircase: 4
+    toilet: 12
+    storage: 4
+    cafeteria: 1
+    entrance_hall: 1
+
+  large:   # ~36 classes, ~900 students
+    classroom: 36
+    special_classroom: 5
+    music_room: 3
+    gymnasium: 2
+    library: 2
+    office: 12
+    teacher_office: 6
+    corridor: 20
+    staircase: 6
+    toilet: 18
+    storage: 6
+    cafeteria: 1
+    entrance_hall: 1
+
+# --- Standard Floor (标准层) Configuration ---
+# Typical floors reduce graph complexity by grouping identical physical floors.
+# Each typical floor type defines which room types appear on it and how
+# the total room count is split across standard floors.
+typical_floors:
+  # Ground floor: always exactly 1 physical floor
+  ground:
+    physical_count: 1
+    rooms:
+      - cafeteria
+      - entrance_hall
+      - gymnasium
+      - library
+      - office
+      - corridor
+      - staircase
+      - toilet
+      - storage
+      - special_classroom   # some special rooms may be on ground
+
+  # Teaching floor: repeated (num_floors - 1) times, or (num_floors - 2) if top floor exists
+  teaching:
+    rooms:
+      - classroom
+      - special_classroom
+      - teacher_office
+      - music_room
+      - corridor
+      - staircase
+      - toilet
+      - storage
+    corridor_segments_per_floor: 4    # Dynamic: corridors = 4 * num_teaching_floors
+    min_corridor_ratio: 0.10          # Ensure ≥10% corridor area
+    max_corridor_ratio: 0.30          # Cap at 30% to avoid waste
+
+  # Top floor (optional): only when num_floors >= 5, provides variation
+  top:
+    min_floors_for_top: 5
+    rooms:
+      - classroom
+      - special_classroom
+      - library
+      - corridor
+      - staircase
+      - toilet
+
+# --- School Size Templates ---
+# Room counts for small / medium / large school configurations.
+# Note: corridor count is NOW DYNAMIC = per_floor_segments * teaching_floor_count.
+# The values below are overridden at generation time.
+school_sizes:
+  small:   # ~12 classes, ~300 students, 2-3 floors
+    classroom: 12
+    special_classroom: 2
+    music_room: 1
+    gymnasium: 1
+    library: 1
+    office: 4
+    teacher_office: 2
+    corridor: 0       # DYNAMIC — computed at generation
+    staircase: 3
+    toilet: 6
+    storage: 2
+    cafeteria: 1
+    entrance_hall: 1
+
+  medium:  # ~24 classes, ~600 students, 3-5 floors
+    classroom: 24
+    special_classroom: 3
+    music_room: 2
+    gymnasium: 1
+    library: 1
+    office: 8
+    teacher_office: 4
+    corridor: 0       # DYNAMIC
+    staircase: 4
+    toilet: 12
+    storage: 4
+    cafeteria: 1
+    entrance_hall: 1
+
+  large:   # ~36 classes, ~900 students, 4-6 floors
+    classroom: 36
+    special_classroom: 5
+    music_room: 3
+    gymnasium: 2
+    library: 2
+    office: 12
+    teacher_office: 6
+    corridor: 0       # DYNAMIC
+    staircase: 6
+    toilet: 18
+    storage: 6
+    cafeteria: 1
+    entrance_hall: 1
+
+# --- Site Parameters ---
+site:
+  bounds: [0.0, 0.0, 200.0, 150.0]  # [min_x, min_y, max_x, max_y] in meters
+  south_is_positive_y: true          # Y+ direction is south
+  main_road_side: "west"             # Main road access side (west / east / south / north)
