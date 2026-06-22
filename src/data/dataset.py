@@ -347,6 +347,15 @@ class SchoolDataset:
                     for name, (passed, violations) in result.validation_results.items()
                 }
 
+            # Compute quality metrics from HeteroData
+            try:
+                from metrics.quality_metrics import QualityMetrics
+                quality = QualityMetrics.compute_all(hetero_data)
+                metadata['quality'] = quality
+                metadata['quality_score'] = QualityMetrics.aggregate(quality)
+            except Exception:
+                pass  # Graceful degradation if metrics computation fails
+
             # Save to both the split dir and raw dir
             import torch
             bundle = {'hetero_data': hetero_data, 'metadata': metadata}

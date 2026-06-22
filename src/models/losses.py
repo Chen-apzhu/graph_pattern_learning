@@ -36,7 +36,7 @@ COL_ZONE_END = 26
 COL_FIRE_EXITS = 26
 
 # Room type index for corridor
-CORRIDOR_IDX = 8  # list(RoomType).index(RoomType.CORRIDOR)
+CORRIDOR_IDX = 7  # list(RoomType).index(RoomType.CORRIDOR)
 
 
 def fire_exit_loss(
@@ -209,9 +209,9 @@ def connectivity_loss(
     return F.relu(0.05 - lambda_2)
 
 
-def compute_quality_score(validation: dict) -> torch.Tensor:
+def compute_constraint_score(validation: dict) -> torch.Tensor:
     """
-    Compute a quality score from constraint validation results.
+    Compute a quality score from constraint validation results (legacy).
 
     Score = proportion of constraints passed (value in [0, 1]).
     If all 6 constraints pass, score = 1.0.
@@ -228,3 +228,7 @@ def compute_quality_score(validation: dict) -> torch.Tensor:
     total = len(validation)
     passed = sum(1 for v in validation.values() if v.get('passed', False))
     return torch.tensor(passed / max(1, total), dtype=torch.float32)
+
+
+# Backward compatibility alias
+compute_quality_score = compute_constraint_score

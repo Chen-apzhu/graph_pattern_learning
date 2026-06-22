@@ -23,7 +23,7 @@ from data.room_factory import (
 from data.constraints import ConstraintValidator
 
 
-def _make_classroom(room_id, occupancy=50, centroid=(10.0, 10.0)):
+def _make_classroom(room_id, occupancy=50, centroid=(10.0, 10.0), typical_floor='ground'):
     """Helper: create a classroom RoomNode."""
     spec = RoomSpec(
         RoomType.CLASSROOM, "教室", (54.0, 72.0), (1.0, 1.8),
@@ -31,17 +31,21 @@ def _make_classroom(room_id, occupancy=50, centroid=(10.0, 10.0)):
         occupancy_density=1.0,  # 1:1 for easy occupancy calc
         fire_exits_min=2, floor_preference=[0, 1, 2, 3],
     )
-    return RoomNode(room_id, spec, float(occupancy), 1.5, 0, centroid, zone_id=0)
+    return RoomNode(room_id, spec, float(occupancy), 1.5, 0,
+                    floor_range=(0, 0), typical_floor=typical_floor,
+                    centroid=centroid, zone_id=0)
 
 
-def _make_music_room(room_id, centroid=(10.0, 10.0)):
+def _make_music_room(room_id, centroid=(10.0, 10.0), typical_floor='ground'):
     """Helper: create a music room."""
     spec = RoomSpec(
         RoomType.MUSIC_ROOM, "音乐教室", (72.0, 90.0), (1.0, 1.6),
         DaylightLevel.MEDIUM, NoiseLevel.LOUD, NoiseLevel.QUIET,
         1.5, 2, [0, 1],
     )
-    return RoomNode(room_id, spec, 80.0, 1.3, 0, centroid, zone_id=1)
+    return RoomNode(room_id, spec, 80.0, 1.3, 0,
+                    floor_range=(0, 0), typical_floor=typical_floor,
+                    centroid=centroid, zone_id=1)
 
 
 # --- Fire Exit Tests ---
@@ -133,7 +137,9 @@ def test_daylight_low_requirement_ok():
         DaylightLevel.NONE, NoiseLevel.MODERATE, NoiseLevel.MODERATE,
         0.8, 1, [0, 1],
     )
-    room = RoomNode("toilet_1", spec, 18.0, 1.5, 0, (10.0, 10.0), 3)
+    room = RoomNode("toilet_1", spec, 18.0, 1.5, 0,
+                    floor_range=(0, 0), typical_floor='ground',
+                    centroid=(10.0, 10.0), zone_id=3)
 
     passed, violations = validator.check_daylight_compliance([room], [])
     assert passed, f"Low-daylight room should pass, got: {violations}"
@@ -290,9 +296,15 @@ def test_circulation_ratio():
     )
 
     rooms = [
-        RoomNode("c1", spec_class, 60.0, 1.5, 0, (0.0, 0.0), 0),
-        RoomNode("c2", spec_class, 60.0, 1.5, 0, (10.0, 0.0), 0),
-        RoomNode("corr", spec_corr, 30.0, 6.0, 0, (5.0, 5.0), 4),
+        RoomNode("c1", spec_class, 60.0, 1.5, 0,
+                 floor_range=(0, 0), typical_floor='ground',
+                 centroid=(0.0, 0.0), zone_id=0),
+        RoomNode("c2", spec_class, 60.0, 1.5, 0,
+                 floor_range=(0, 0), typical_floor='ground',
+                 centroid=(10.0, 0.0), zone_id=0),
+        RoomNode("corr", spec_corr, 30.0, 6.0, 0,
+                 floor_range=(0, 0), typical_floor='ground',
+                 centroid=(5.0, 5.0), zone_id=4),
     ]
 
     passed, violations = validator.check_circulation_ratio(rooms)
@@ -332,6 +344,82 @@ def test_validate_all_success():
     print("  PASS: test_validate_all_success")
 
 
+# --- Area Completeness Tests ---
+
+def _make_room_for_area_test(room_id, room_type, area, floor=0, typical_floor='ground', centroid=(10.0, 5.0)):
+    """Helper for area completeness tests."""
+    spec = RoomSpec(
+        room_type, str(room_type.value), (50.0, 600.0), (1.0, 2.0),
+        DaylightLevel.HIGH, NoiseLevel.MODERATE, NoiseLevel.MODERATE,
+        1.0, 2, [0, 1, 2],
+    )
+    return RoomNode(room_id, spec, area, 1.5, floor,
+                    floor_range=(floor, floor), typical_floor=typical_floor,
+                    centroid=centroid, zone_id=0)
+
+
+def test_area_completeness_pass():
+    """Each typical floor within tolerance of per_floor_area * num_spanned."""
+    validator = ConstraintValidator()
+    # Each room has num_floors_spanned=1 (single physical floor)
+    rooms = [
+        _make_room_for_area_test("r_g1", RoomType.CLASSROOM, 500.0, floor=0, typical_floor='ground'),
+        _make_room_for_area_test("r_g2", RoomType.CORRIDOR, 500.0, floor=0, typical_floor='ground'),
+        _make_room_for_area_test("r_t1", RoomType.CLASSROOM, 980.0, floor=1, typical_floor='teaching'),
+        _make_room_for_area_test("r_p1", RoomType.CLASSROOM, 500.0, floor=2, typical_floor='top'),
+        _make_room_for_area_test("r_p2", RoomType.CORRIDOR, 500.0, floor=2, typical_floor='top'),
+    ]
+    per_floor = 1000.0
+    passed, violations = validator.check_area_completeness(rooms, num_floors=3, per_floor_area=per_floor)
+    assert passed, f"Should pass. Violations: {violations}"
+    print("  PASS: test_area_completeness_pass")
+
+
+def test_area_completeness_fail_under():
+    """Total area far below budget should fail."""
+    validator = ConstraintValidator({'building_footprint': {'area_tolerance': 0.05}})
+    rooms = [
+        _make_room_for_area_test("r1", RoomType.CLASSROOM, 350.0, typical_floor='ground'),
+        _make_room_for_area_test("r2", RoomType.CLASSROOM, 350.0, typical_floor='ground'),
+    ]
+    per_floor = 1000.0
+    passed, violations = validator.check_area_completeness(rooms, num_floors=3, per_floor_area=per_floor)
+    assert not passed, f"Total={700:.0f}, budget={per_floor}, deviation=30% should fail"
+    assert len(violations) > 0
+    print("  PASS: test_area_completeness_fail_under")
+
+
+def test_area_completeness_fail_over():
+    """Total area far above budget should fail."""
+    validator = ConstraintValidator({'building_footprint': {'area_tolerance': 0.05}})
+    rooms = [
+        _make_room_for_area_test("r1", RoomType.CLASSROOM, 700.0, typical_floor='ground'),
+        _make_room_for_area_test("r2", RoomType.CLASSROOM, 600.0, typical_floor='ground'),
+    ]
+    per_floor = 1000.0
+    passed, violations = validator.check_area_completeness(rooms, num_floors=3, per_floor_area=per_floor)
+    assert not passed, f"Total={1300:.0f}, budget={per_floor}, deviation=30% should fail"
+    assert len(violations) > 0
+    print("  PASS: test_area_completeness_fail_over")
+
+
+def test_area_completeness_per_floor_check():
+    """Verify per-typical-floor checking catches one floor deviation."""
+    validator = ConstraintValidator({'building_footprint': {'area_tolerance': 0.05}})
+    per_floor = 500.0
+    rooms = [
+        # Ground floor: total = 500 (OK)
+        _make_room_for_area_test("r_g1", RoomType.CLASSROOM, 300.0, floor=0, typical_floor='ground'),
+        _make_room_for_area_test("r_g2", RoomType.CORRIDOR, 200.0, floor=0, typical_floor='ground'),
+        # Teaching floor: total = 300 (60% of budget → FAIL)
+        _make_room_for_area_test("r_t1", RoomType.CLASSROOM, 200.0, floor=1, typical_floor='teaching'),
+        _make_room_for_area_test("r_t2", RoomType.CORRIDOR, 100.0, floor=1, typical_floor='teaching'),
+    ]
+    passed, violations = validator.check_area_completeness(rooms, num_floors=2, per_floor_area=per_floor)
+    assert not passed, "Teaching floor under-filled should fail per-floor check"
+    print("  PASS: test_area_completeness_per_floor_check")
+
+
 def run_all_tests():
     test_fire_exit_pass()
     test_fire_exit_fail_insufficient_degree()
@@ -348,6 +436,10 @@ def run_all_tests():
     test_area_bounds_fail()
     test_circulation_ratio()
     test_validate_all_success()
+    test_area_completeness_pass()
+    test_area_completeness_fail_under()
+    test_area_completeness_fail_over()
+    test_area_completeness_per_floor_check()
 
 
 if __name__ == '__main__':

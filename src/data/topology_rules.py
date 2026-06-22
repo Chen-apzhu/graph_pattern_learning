@@ -46,13 +46,15 @@ class TopologyRuleEngine:
     Rules reference the building_rules.yaml parameters for tunable thresholds.
     """
 
-    def __init__(self, rule_params: Optional[Dict] = None):
+    def __init__(self, rule_params: Optional[Dict] = None, seed: int = None):
         """
         Args:
             rule_params: Optional dict of parameters from building_rules.yaml.
-                         If not provided, sensible defaults are used.
+            seed: Random seed for stochastic edge creation (daylight, redundant connections).
         """
+        import random as _random
         params = rule_params or {}
+        self._rng = _random.Random(seed) if seed is not None else _random.Random()
 
         # Acoustic parameters
         acoustic = params.get('acoustic', {})
@@ -143,40 +145,127 @@ class TopologyRuleEngine:
         env_nodes: list,  # List[EnvironmentalNode]
     ) -> List[Edge]:
         """
-        Rule P2: Corridors on the same floor connect to form a continuous
-        circulation spine.
+        Rule P2: Corridors on the same floor connect to form a circulation
+        network. The topology is randomized per graph to create diversity:
 
-        Connects adjacent corridors (sorted by X coordinate on each floor)
-        to ensure the physical graph's circulation subgraph is connected.
+          - 'spine' (60%): linear chain sorted by X (traditional spine)
+          - 'loop' (25%): spine with tail-to-head closure (ring corridor)
+          - 'branch' (15%): Y-shaped branch from a central hub corridor
 
-        Formula:
-            For each floor:
-                Sort corridors by X
-                Connect consecutive corridors (c[i] → c[i+1])
+        Each topology creates different global circulation patterns that
+        the GNN can learn to distinguish.
         """
         edges: List[Edge] = []
         corridors = [r for r in rooms if r.room_type == RoomType.CORRIDOR]
 
-        # Group by floor
         by_floor: Dict[int, list] = defaultdict(list)
         for c in corridors:
             by_floor[c.floor].append(c)
 
         for _floor_num, floor_corridors in by_floor.items():
-            # Sort by X coordinate to establish adjacency
-            sorted_c = sorted(floor_corridors, key=lambda r: r.centroid[0])
+            if len(floor_corridors) < 2:
+                continue
 
-            for i in range(len(sorted_c) - 1):
-                c1, c2 = sorted_c[i], sorted_c[i + 1]
-                dist = c1.euclidean_distance_to(c2)
-                edges.append((
-                    c1.room_id,
-                    c2.room_id,
-                    {
-                        'distance_weight': dist,
-                        'is_stair_connection': 0.0,
-                    },
-                ))
+            sorted_c = sorted(floor_corridors, key=lambda r: r.centroid[0])
+            n = len(sorted_c)
+            topo_type = self._rng.choices(
+                ['spine', 'spine', 'spine', 'loop', 'loop', 'branch'],
+                k=1
+            )[0]
+
+            if topo_type == 'spine':
+                # Linear chain: c0−c1−c2−...−cn
+                for i in range(n - 1):
+                    edges.append((sorted_c[i].room_id, sorted_c[i+1].room_id,
+                                  {'distance_weight': sorted_c[i].euclidean_distance_to(sorted_c[i+1]),
+                                   'is_stair_connection': 0.0}))
+
+            elif topo_type == 'loop':
+                # Ring: spine + tail→head closure
+                for i in range(n - 1):
+                    edges.append((sorted_c[i].room_id, sorted_c[i+1].room_id,
+                                  {'distance_weight': sorted_c[i].euclidean_distance_to(sorted_c[i+1]),
+                                   'is_stair_connection': 0.0}))
+                # Close the loop
+                edges.append((sorted_c[-1].room_id, sorted_c[0].room_id,
+                              {'distance_weight': sorted_c[-1].euclidean_distance_to(sorted_c[0]),
+                               'is_stair_connection': 0.0}))
+
+            elif topo_type == 'branch':
+                # Y-branch: hub at n//2, all others connect to hub
+                hub = sorted_c[n // 2]
+                for i in range(n):
+                    if i != n // 2:
+                        edges.append((sorted_c[i].room_id, hub.room_id,
+                                      {'distance_weight': sorted_c[i].euclidean_distance_to(hub),
+                                       'is_stair_connection': 0.0}))
+
+        return edges
+
+    def connect_corridor_cross_links(
+        self,
+        rooms: list,
+        env_nodes: list,
+    ) -> List[Edge]:
+        """
+        Rule P2b: Add random cross-links between non-adjacent corridor
+        segments on the same floor. Creates redundant paths → mesh-like
+        circulation network with higher algebraic connectivity (lambda_2).
+
+        40% probability per eligible pair.
+        """
+        edges: List[Edge] = []
+        corridors = [r for r in rooms if r.room_type == RoomType.CORRIDOR]
+        by_floor: Dict[int, list] = defaultdict(list)
+        for c in corridors:
+            by_floor[c.floor].append(c)
+
+        for _floor_num, floor_corridors in by_floor.items():
+            if len(floor_corridors) < 3:
+                continue
+            sorted_c = sorted(floor_corridors, key=lambda r: r.centroid[0])
+            # Add cross-links between every other corridor (skip neighbors)
+            for i in range(len(sorted_c) - 2):
+                if self._rng.random() < 0.4:
+                    j = i + 2 + self._rng.randint(0, min(2, len(sorted_c) - i - 3))
+                    dist = sorted_c[i].euclidean_distance_to(sorted_c[j])
+                    edges.append((sorted_c[i].room_id, sorted_c[j].room_id,
+                                  {'distance_weight': dist, 'is_stair_connection': 0.0}))
+
+        return edges
+
+    def connect_redundant_room_links(
+        self,
+        rooms: list,
+        env_nodes: list,
+    ) -> List[Edge]:
+        """
+        Rule P1b: Add redundant room→corridor connections.
+        Some rooms (30% chance) get a second physical connection to another
+        corridor beyond their nearest one. This creates mesh-like local
+        circulation, providing alternative evacuation routes.
+
+        Only applies when multiple corridors exist on the same floor.
+        """
+        edges: List[Edge] = []
+        corridors = [r for r in rooms if r.room_type == RoomType.CORRIDOR]
+        non_corridors = [r for r in rooms if r.room_type != RoomType.CORRIDOR]
+
+        for room in non_corridors:
+            if self._rng.random() > 0.3:
+                continue
+
+            overlapping = [c for c in corridors if c.overlaps_floor(room)]
+            if len(overlapping) < 2:
+                continue
+
+            # Find the SECOND-nearest corridor
+            sorted_c = sorted(overlapping, key=lambda c: room.euclidean_distance_to(c))
+            second = sorted_c[1] if len(sorted_c) > 1 else None
+            if second is not None:
+                dist = room.euclidean_distance_to(second)
+                edges.append((room.room_id, second.room_id,
+                              {'distance_weight': dist, 'is_stair_connection': 0.0}))
 
         return edges
 
@@ -513,17 +602,24 @@ class TopologyRuleEngine:
         env_nodes: list,  # List[EnvironmentalNode]
     ) -> List[Edge]:
         """
-        Rule S2: Rooms with daylight_level == MEDIUM get sight_lines
-        to the nearest corridor (which acts as a light well proxy).
+        Rule S2: Rooms with daylight_level >= MEDIUM get sight_lines
+        to the nearest corridor (light well proxy).
 
-        This simulates indirect daylight through corridor windows/atriums.
+        HIGH rooms: 60% probability of second sight path via corridor.
+        MEDIUM rooms: always get corridor connection (their only daylight).
+        Randomization creates meaningful variance in daylight_quality scores.
         """
         edges: List[Edge] = []
         corridors = [r for r in rooms if r.room_type == RoomType.CORRIDOR]
 
         for room in rooms:
-            if room.spec.daylight_level != DaylightLevel.MEDIUM:
+            if room.spec.daylight_level < DaylightLevel.MEDIUM:
                 continue
+
+            if room.spec.daylight_level >= DaylightLevel.HIGH:
+                # 60% chance of additional corridor connection
+                if self._rng.random() > 0.6:
+                    continue
 
             same_floor = [c for c in corridors if c.floor == room.floor]
             nearest = min(
@@ -533,11 +629,12 @@ class TopologyRuleEngine:
             )
             if nearest is not None:
                 dist = room.euclidean_distance_to(nearest)
+                transparency = 0.4 if room.spec.daylight_level >= DaylightLevel.HIGH else 0.5
                 edges.append((
                     room.room_id,
                     nearest.room_id,
                     {
-                        'transparency': 0.5,  # medium daylight via corridor
+                        'transparency': transparency,
                         'sight_distance': dist,
                     },
                 ))
@@ -618,6 +715,8 @@ class TopologyRuleEngine:
         phys_edges: List[Edge] = []
         phys_edges.extend(self.connect_rooms_to_corridors(rooms, env_nodes))
         phys_edges.extend(self.connect_corridor_network(rooms, env_nodes))
+        phys_edges.extend(self.connect_corridor_cross_links(rooms, env_nodes))
+        phys_edges.extend(self.connect_redundant_room_links(rooms, env_nodes))
         phys_edges.extend(self.connect_staircases_to_corridors(rooms, env_nodes))
         phys_edges.extend(self.connect_staircase_vertical_chain(rooms, env_nodes))
         phys_edges.extend(self.connect_entrance_to_corridor_and_road(rooms, env_nodes))

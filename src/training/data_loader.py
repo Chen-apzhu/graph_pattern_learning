@@ -62,9 +62,17 @@ class SchoolDataLoader:
         hetero_data = bundle['hetero_data']
         metadata = bundle.get('metadata', {})
 
-        # Compute quality score from constraint validation
-        validation = metadata.get('validation', {})
-        score = compute_quality_score(validation)
+        # Use quality metrics if available (new), fallback to constraint score
+        quality = metadata.get('quality', None)
+        if quality is not None and isinstance(quality, dict):
+            from metrics.quality_metrics import QualityMetrics
+            score = torch.tensor(QualityMetrics.aggregate(quality), dtype=torch.float32)
+        elif 'quality_score' in metadata:
+            score = torch.tensor(metadata['quality_score'], dtype=torch.float32)
+        else:
+            # Backward compat: compute from constraint validation
+            validation = metadata.get('validation', {})
+            score = compute_quality_score(validation)
 
         return hetero_data, score, metadata
 

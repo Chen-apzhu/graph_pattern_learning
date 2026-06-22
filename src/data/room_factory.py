@@ -380,9 +380,11 @@ class RoomFactory:
         """
         spec = self._catalog.get(room_type)
 
-        # Randomly sample area from valid range
+        # Sample area near mid-range (generator's _allocate_areas finalizes to budget)
         area_min, area_max = spec.area_range_sqm
-        area = float(self._rng.uniform(area_min, area_max))
+        area_mid = (area_min + area_max) / 2.0
+        area = float(self._rng.uniform(area_mid * 0.9, area_mid * 1.1))
+        area = max(area_min, min(area_max, area))  # Clamp to valid range
 
         # Randomly sample aspect ratio from valid range
         ar_min, ar_max = spec.aspect_ratio_range

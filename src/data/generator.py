@@ -95,7 +95,7 @@ class SchoolBuildingGenerator:
         self.env_factory = EnvNodeFactory(
             self._get_site_bounds(), self.rng
         )
-        self.rule_engine = TopologyRuleEngine(self.rule_params)
+        self.rule_engine = TopologyRuleEngine(self.rule_params, seed=self.seed)
         self.validator = ConstraintValidator(self.rule_params)
         self.feature_engineer = FeatureEngineer()
 
@@ -183,7 +183,7 @@ class SchoolBuildingGenerator:
                 3.0, 1, [1, 2, 3],
             ),
             RoomType.CORRIDOR: RoomSpec(
-                RoomType.CORRIDOR, "走道", (12.0, 48.0), (3.0, 12.0),
+                RoomType.CORRIDOR, "走道", (12.0, 300.0), (3.0, 12.0),
                 DaylightLevel.LOW, NoiseLevel.NOISY, NoiseLevel.LOUD,
                 0.3, 2, [0, 1, 2, 3, 4],
             ),
@@ -193,7 +193,7 @@ class SchoolBuildingGenerator:
                 0.5, 2, [0, 1, 2, 3, 4],
             ),
             RoomType.TOILET: RoomSpec(
-                RoomType.TOILET, "卫生间", (12.0, 24.0), (1.0, 2.5),
+                RoomType.TOILET, "卫生间（含男女）", (25.0, 55.0), (1.0, 2.5),
                 DaylightLevel.NONE, NoiseLevel.MODERATE, NoiseLevel.MODERATE,
                 0.8, 1, [0, 1, 2, 3, 4],
             ),
@@ -240,30 +240,24 @@ class SchoolBuildingGenerator:
             # Hardcoded fallbacks
             fallbacks = {
                 'small': {
-                    RoomType.CLASSROOM: 12, RoomType.SPECIAL_CLASSROOM: 2,
-                    RoomType.MUSIC_ROOM: 1, RoomType.GYMNASIUM: 1,
-                    RoomType.LIBRARY: 1, RoomType.OFFICE: 4,
-                    RoomType.TEACHER_OFFICE: 2, RoomType.CORRIDOR: 8,
-                    RoomType.STAIRCASE: 3, RoomType.TOILET: 6,
-                    RoomType.STORAGE: 2, RoomType.CAFETERIA: 1,
+                    RoomType.CLASSROOM: 12, RoomType.SPECIAL_CLASSROOM: 3,
+                    RoomType.MUSIC_ROOM: 1, RoomType.TEACHER_OFFICE: 3,
+                    RoomType.CORRIDOR: 0, RoomType.STAIRCASE: 6,
+                    RoomType.TOILET: 3, RoomType.STORAGE: 3,
                     RoomType.ENTRANCE_HALL: 1,
                 },
                 'medium': {
-                    RoomType.CLASSROOM: 24, RoomType.SPECIAL_CLASSROOM: 3,
-                    RoomType.MUSIC_ROOM: 2, RoomType.GYMNASIUM: 1,
-                    RoomType.LIBRARY: 1, RoomType.OFFICE: 8,
-                    RoomType.TEACHER_OFFICE: 4, RoomType.CORRIDOR: 14,
-                    RoomType.STAIRCASE: 4, RoomType.TOILET: 12,
-                    RoomType.STORAGE: 4, RoomType.CAFETERIA: 1,
+                    RoomType.CLASSROOM: 24, RoomType.SPECIAL_CLASSROOM: 4,
+                    RoomType.MUSIC_ROOM: 2, RoomType.TEACHER_OFFICE: 5,
+                    RoomType.CORRIDOR: 0, RoomType.STAIRCASE: 8,
+                    RoomType.TOILET: 5, RoomType.STORAGE: 5,
                     RoomType.ENTRANCE_HALL: 1,
                 },
                 'large': {
-                    RoomType.CLASSROOM: 36, RoomType.SPECIAL_CLASSROOM: 5,
-                    RoomType.MUSIC_ROOM: 3, RoomType.GYMNASIUM: 2,
-                    RoomType.LIBRARY: 2, RoomType.OFFICE: 12,
-                    RoomType.TEACHER_OFFICE: 6, RoomType.CORRIDOR: 20,
-                    RoomType.STAIRCASE: 6, RoomType.TOILET: 18,
-                    RoomType.STORAGE: 6, RoomType.CAFETERIA: 1,
+                    RoomType.CLASSROOM: 36, RoomType.SPECIAL_CLASSROOM: 6,
+                    RoomType.MUSIC_ROOM: 3, RoomType.TEACHER_OFFICE: 8,
+                    RoomType.CORRIDOR: 0, RoomType.STAIRCASE: 10,
+                    RoomType.TOILET: 7, RoomType.STORAGE: 8,
                     RoomType.ENTRANCE_HALL: 1,
                 },
             }
@@ -491,6 +485,144 @@ class SchoolBuildingGenerator:
                 room.centroid = (x, y)
 
     # ========================================================================
+    # Area allocation (budget-constrained)
+    # ========================================================================
+
+    def _get_per_floor_area(self, school_size: str) -> float:
+        """Get the per-floor design area for a given school size."""
+        footprint = self.rule_params.get('building_footprint', {})
+        size_config = footprint.get(school_size, {})
+        return size_config.get('per_floor_area', None)
+
+    def _allocate_areas(
+        self,
+        rooms: List[RoomNode],
+        per_floor_area: float,
+        target_corridor_ratio: float = None,
+    ) -> None:
+        """
+        Budget-constrained area allocation per typical floor.
+
+        Each typical floor type covers N physical floors. Budget is scaled:
+        budget_tf = per_floor_area × num_physical_floors_in_tf.
+
+        Corridor ratio is sampled randomly within [0.10, 0.25] per graph
+        to create meaningful variance in circulation efficiency scores.
+
+        Strategy:
+          1. Reserve target_corridor_ratio of budget for corridors
+          2. Allocate remaining budget to fixed rooms from their minimum
+          3. Clamp all rooms to spec bounds
+          4. Absorb remaining slack into corridors
+
+        Modifies room.area IN PLACE.
+        """
+        if target_corridor_ratio is None:
+            target_corridor_ratio = float(self.rng.uniform(0.10, 0.20))
+        from utils.enums import RoomType
+
+        # Determine how many physical floors each typical floor type spans
+        tf_phys_counts: Dict[str, int] = {}
+        for room in rooms:
+            tf = getattr(room, 'typical_floor', 'ground')
+            n_spanned = room.num_floors_spanned
+            tf_phys_counts[tf] = max(tf_phys_counts.get(tf, 0), n_spanned)
+        for tf in list(tf_phys_counts.keys()):
+            if tf_phys_counts[tf] < 1:
+                tf_phys_counts[tf] = 1
+
+        tf_groups: Dict[str, list] = {}
+        for room in rooms:
+            tf = getattr(room, 'typical_floor', 'ground')
+            tf_groups.setdefault(tf, []).append(room)
+
+        for tf, tf_rooms in tf_groups.items():
+            n_phys = tf_phys_counts.get(tf, 1)
+            budget = per_floor_area * n_phys
+
+            corridors: list = []
+            fixed_rooms: list = []
+            for r in tf_rooms:
+                if r.room_type == RoomType.CORRIDOR:
+                    corridors.append(r)
+                else:
+                    fixed_rooms.append(r)
+
+            # Target corridor budget
+            target_corr_budget = budget * target_corridor_ratio
+            fixed_budget = budget - target_corr_budget
+
+            # Step 1: Start fixed rooms at their MINIMUM valid area
+            for r in fixed_rooms:
+                r.area = r.spec.area_range_sqm[0]
+
+            # Step 2: Allocate to fixed rooms first (up to 82% of budget)
+            fixed_min_sum = sum(r.area for r in fixed_rooms)
+            fixed_max_budget = budget * (1.0 - target_corridor_ratio)
+            corr_target = budget * target_corridor_ratio
+
+            if fixed_min_sum > fixed_max_budget:
+                # Fixed rooms at min already exceed 82% budget — squeeze corridors
+                fixed_max_budget = budget - sum(
+                    r.spec.area_range_sqm[0] for r in corridors
+                ) if corridors else budget
+                # Scale fixed rooms down toward their mins
+                for r in fixed_rooms:
+                    r.area = r.spec.area_range_sqm[0]
+            else:
+                # Scale fixed rooms from min toward max, up to fixed_max_budget
+                fixed_ranges = [
+                    r.spec.area_range_sqm[1] - r.spec.area_range_sqm[0]
+                    for r in fixed_rooms
+                ]
+                total_fixed_range = sum(fixed_ranges)
+                fixed_slack = fixed_max_budget - fixed_min_sum
+                if total_fixed_range > 0 and fixed_slack > 0:
+                    for r, rng in zip(fixed_rooms, fixed_ranges):
+                        r.area = r.spec.area_range_sqm[0] + (rng / total_fixed_range) * fixed_slack
+                        r_min, r_max = r.spec.area_range_sqm
+                        r.area = max(r_min, min(r_max, r.area))
+
+            # Step 3: Give remaining budget to corridors (capped at 25%)
+            fixed_actual = sum(r.area for r in fixed_rooms)
+            corr_budget = min(budget - fixed_actual, budget * 0.25)
+
+            if corridors:
+                corr_ranges = [r.spec.area_range_sqm[1] - r.spec.area_range_sqm[0] for r in corridors]
+                total_corr_range = sum(corr_ranges)
+                corr_min_sum = sum(r.spec.area_range_sqm[0] for r in corridors)
+                corr_slack = corr_budget - corr_min_sum
+                if total_corr_range > 0 and corr_slack > 0:
+                    for r, rng in zip(corridors, corr_ranges):
+                        r.area = r.spec.area_range_sqm[0] + (rng / total_corr_range) * corr_slack
+                        r_min, r_max = r.spec.area_range_sqm
+                        r.area = max(r_min, min(r_max, r.area))
+
+            # Step 4: Absorb remaining slack into corridors (capped at 25% total)
+            total_actual = sum(r.area for r in fixed_rooms) + sum(r.area for r in corridors)
+            remaining = budget - total_actual
+            max_corr = budget * 0.25
+            current_corr = sum(r.area for r in corridors)
+            corr_headroom = max_corr - current_corr
+            absorb = min(remaining, max(0.0, corr_headroom))
+            if absorb > 0.5 and corridors:
+                total_corr = sum(r.area for r in corridors)
+                if total_corr > 0:
+                    for r in corridors:
+                        r.area += absorb * (r.area / total_corr)
+
+            # Step 5: Distribute any UNALLOCATED budget proportionally
+            # (keeps area completeness without blowing up corridor ratio)
+            total_actual2 = sum(r.area for r in fixed_rooms) + sum(r.area for r in corridors)
+            remaining2 = budget - total_actual2
+            if remaining2 > 1.0:
+                all_rooms = fixed_rooms + corridors
+                total_all = sum(r.area for r in all_rooms)
+                if total_all > 0:
+                    for r in all_rooms:
+                        r.area += remaining2 * (r.area / total_all)
+
+    # ========================================================================
     # Main generation pipeline
     # ========================================================================
 
@@ -550,6 +682,11 @@ class SchoolBuildingGenerator:
             # Step 2b: Enforce minimum room distribution rules
             enforce_minimums(rooms, num_floors)
 
+            # Step 2c: Budget-constrained area allocation
+            per_floor_area = self._get_per_floor_area(school_size)
+            if per_floor_area is not None:
+                self._allocate_areas(rooms, per_floor_area)
+
             # Step 3: Generate environmental nodes
             env_nodes = self.env_factory.generate_all(school_size)
 
@@ -561,7 +698,7 @@ class SchoolBuildingGenerator:
 
             # Step 6: Validate
             if validate:
-                results = self.validator.validate_all(rooms, env_nodes, edges_by_category)
+                results = self.validator.validate_all(rooms, env_nodes, edges_by_category, num_floors=num_floors, per_floor_area=per_floor_area)
                 all_passed = ConstraintValidator.all_passed(results)
                 num_violations = sum(
                     len(vs) for _p, vs in results.values()
@@ -600,7 +737,7 @@ class SchoolBuildingGenerator:
 
             else:
                 # No validation — return immediately
-                results = self.validator.validate_all(rooms, env_nodes, edges_by_category)
+                results = self.validator.validate_all(rooms, env_nodes, edges_by_category, num_floors=num_floors, per_floor_area=per_floor_area)
                 self._last_rooms = rooms
                 self._last_env_nodes = env_nodes
                 self._last_edges = edges_by_category

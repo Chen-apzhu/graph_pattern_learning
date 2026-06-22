@@ -67,6 +67,11 @@ class ConstraintValidator:
             'physical_graph_must_be_connected', True
         )
 
+        # Area completeness config
+        footprint = config.get('building_footprint', {})
+        self._area_tolerance: float = footprint.get('area_tolerance', 0.05)
+        # per_floor_area is NOT stored here — it's per school size, passed at call time
+
     # ======================================================================
     # Fire Safety Constraint (§4 硬约束, 消防疏散)
     # ======================================================================
@@ -406,6 +411,85 @@ class ConstraintValidator:
         return (len(violations) == 0, violations)
 
     # ======================================================================
+    # Area Completeness Constraint (§4 硬约束, 面积完备性)
+    # ======================================================================
+
+    def check_area_completeness(
+        self,
+        rooms: list,                    # List[RoomNode]
+        num_floors: int,
+        per_floor_area: float = None,
+    ) -> Tuple[bool, List[str]]:
+        """
+        Area Completeness Constraint (Hard).
+
+        Formula:
+            For each typical floor type tf ∈ {ground, teaching, top}:
+                Let rooms_tf = {r | r.typical_floor == tf}
+                Let sum_area_tf = Σ(r.area for r in rooms_tf)
+                Let deviation = |sum_area_tf - per_floor_area| / per_floor_area
+                If deviation > area_tolerance → VIOLATION
+
+            Global check:
+                total_design = per_floor_area × num_floors
+                deviation = |Σ(r.area) - total_design| / total_design
+                If deviation > area_tolerance → VIOLATION
+
+        Rationale: All rooms, corridors, and service spaces must fill the
+        building footprint boundary. There should be no leftover empty space
+        or gaps in the floor plan.
+        """
+        violations: List[str] = []
+
+        if per_floor_area is None:
+            per_floor_area = getattr(self, '_per_floor_area', None)
+        if per_floor_area is None:
+            return (True, [])  # No footprint defined → skip
+
+        tolerance = getattr(self, '_area_tolerance', 0.05)
+
+        # --- Per-typical-floor check ---
+        tf_groups: dict = {}
+        for r in rooms:
+            tf = getattr(r, 'typical_floor', 'ground')
+            tf_groups.setdefault(tf, []).append(r)
+
+        for tf, tf_rooms in tf_groups.items():
+            # Each typical floor covers N physical floors — budget scales accordingly
+            n_spanned = max(
+                (getattr(r, 'num_floors_spanned', 1) for r in tf_rooms),
+                default=1
+            )
+            tf_budget = per_floor_area * n_spanned
+            sum_area = sum(r.area for r in tf_rooms)
+            deviation = abs(sum_area - tf_budget) / tf_budget if tf_budget > 0 else 0
+            if deviation > tolerance:
+                violations.append(
+                    f"[AREA_COMPLETENESS] Typical floor '{tf}' "
+                    f"(×{n_spanned} phys floors): "
+                    f"sum(area)={sum_area:.1f} m² vs budget={tf_budget:.1f} m², "
+                    f"deviation={deviation:.2%} > {tolerance:.2%}."
+                )
+
+        # --- Global check ---
+        # Each room's area contributes to all floors it spans. For global check,
+        # compare simple sum against per_floor_area * num_floors. The per-floor
+        # check above handles the weighted allocation per typical floor type.
+        total_simple = sum(r.area for r in rooms)
+        total_design = per_floor_area * num_floors
+        if total_design > 0:
+            global_deviation = abs(total_simple - total_design) / total_design
+            if global_deviation > tolerance:
+                violations.append(
+                    f"[AREA_COMPLETENESS] Global: Σ(area)={total_simple:.1f} m² "
+                    f"vs total_design={total_design:.1f} m² ({num_floors} fl × "
+                    f"{per_floor_area:.1f} m²), deviation={global_deviation:.2%} "
+                    f"> {tolerance:.2%}."
+                )
+
+        return (len(violations) == 0, violations)
+
+    # ======================================================================
     # Master validation
     # ======================================================================
 
@@ -414,6 +498,8 @@ class ConstraintValidator:
         rooms: list,                           # List[RoomNode]
         env_nodes: list,                       # List[EnvironmentalNode]
         all_edges: Dict[EdgeCategory, list],   # Dict[EdgeCategory, List[Edge]]
+        num_floors: int = None,                # For area completeness check
+        per_floor_area: float = None,          # For area completeness check
     ) -> Dict[str, Tuple[bool, List[str]]]:
         """
         Run all hard and soft constraint checks.
@@ -422,6 +508,8 @@ class ConstraintValidator:
             rooms: List of RoomNode instances.
             env_nodes: List of EnvironmentalNode instances.
             all_edges: Dict mapping EdgeCategory → edge list.
+            num_floors: Number of floors (for area completeness).
+            per_floor_area: Per-floor design area in m² (for area completeness).
 
         Returns:
             Dict mapping constraint name → (passed, violations).
@@ -441,6 +529,9 @@ class ConstraintValidator:
         results['connectivity'] = self.check_connectivity(rooms, phys_edges)
         results['area_bounds'] = self.check_area_bounds(rooms)
         results['circulation_ratio'] = self.check_circulation_ratio(rooms)
+        results['area_completeness'] = self.check_area_completeness(
+            rooms, num_floors or 3, per_floor_area
+        )
 
         return results
 
@@ -453,8 +544,8 @@ class ConstraintValidator:
     def hard_constraints_passed(
         results: Dict[str, Tuple[bool, List[str]]]
     ) -> bool:
-        """Check if all hard constraints passed (fire, daylight, acoustic, connectivity)."""
-        hard_keys = {'fire_exits', 'daylight', 'acoustic', 'connectivity'}
+        """Check if all hard constraints passed (fire, daylight, acoustic, connectivity, area_completeness)."""
+        hard_keys = {'fire_exits', 'daylight', 'acoustic', 'connectivity', 'area_completeness'}
         return all(
             results[k][0] for k in hard_keys if k in results
         )

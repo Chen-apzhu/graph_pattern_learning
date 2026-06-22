@@ -62,7 +62,7 @@ class OrthogonalLayoutEngine:
     BUILDING_DEPTH = 20.0     # classroom 9m + corridor 3m + north rooms 8m
     MIN_ROOM_W = 7.0          # Minimum classroom width (~60m² / 9m depth)
     STAIR_W = 4.0
-    TOILET_W = 4.0
+    TOILET_W = 5.5  # combined restroom (male+female)
     MAX_ROW_WIDTH = 80.0      # Max building width before splitting into wings
 
     def __init__(self, **kwargs):
@@ -162,6 +162,10 @@ class OrthogonalLayoutEngine:
         used_ids = {id(r) for r in corridors + stairs + toilets + storage + south + north}
         south += [r for r in rooms if id(r) not in used_ids]
 
+        # Interleave by type to prevent clustering
+        south = self._interleave_by_type(south)
+        north = self._interleave_by_type(north)
+
         # Estimate width needed for south and north rows
         south_est = self._estimate_row_width(south, stairs[:2])
         north_est = self._estimate_row_width(toilets + storage, stairs[2:])
@@ -196,19 +200,31 @@ class OrthogonalLayoutEngine:
             color=ROOM_COLORS['corridor'],
         ))
 
-        # ── South row: classrooms ──
+        # ── South row: classrooms with evenly distributed staircases ──
         south_y = corr_y + self.CORRIDOR_H + 0.5
         south_h = (by + bh) - south_y - 0.5
-        south_row = stairs[:1] + south + stairs[1:2]
+        # Distribute stairs evenly across south row
+        n_stairs_south = min(len(stairs), 2)
+        if n_stairs_south >= 2 and len(south) >= 3:
+            mid = len(south) // 2
+            south_row = stairs[:1] + south[:mid] + stairs[1:2] + south[mid:]
+        else:
+            south_row = stairs[:1] + south + stairs[1:2] if stairs else south
         result.extend(self._pack_row(south_row, bx, south_y, bld_w, south_h, floor_idx))
 
-        # ── North row: toilets evenly spaced for optimal coverage ──
+        # ── North row: toilets evenly spaced ──
         north_y = by + 0.5
         north_h = corr_y - north_y - 0.5
         optimal_n = max(2, int(bld_w / 35) + 1)
         usable_toilets = toilets[:min(optimal_n, len(toilets))]
+        remaining_stairs = stairs[2:] if len(stairs) > 2 else []
+        # Interleave storage with toilets for variety
+        north_items = usable_toilets + storage
+        north_items = self._interleave_by_type(north_items)
+        if remaining_stairs:
+            north_items = remaining_stairs[:1] + north_items
         result.extend(self._place_toilets_evenly(
-            usable_toilets, storage, stairs[2:],
+            usable_toilets, storage, remaining_stairs,
             bx, north_y, bld_w, north_h, floor_idx))
 
         return (result, bld_w)
@@ -336,63 +352,79 @@ class OrthogonalLayoutEngine:
 
         return result
 
+    def _interleave_by_type(self, rooms: list) -> list:
+        """Interleave rooms by type to prevent same-type clustering."""
+        if len(rooms) <= 2:
+            return rooms
+        # Group by type
+        by_type: Dict[str, list] = {}
+        for r in rooms:
+            rt = self._rt(r)
+            by_type.setdefault(rt, []).append(r)
+        # Sort groups largest first
+        groups = sorted(by_type.values(), key=len, reverse=True)
+        # Round-robin interleave
+        result = []
+        max_len = max(len(g) for g in groups)
+        for i in range(max_len):
+            for g in groups:
+                if i < len(g):
+                    result.append(g[i])
+        return result
+
     def _pack_row(
         self, rooms: list,
         x0: float, y0: float, total_w: float, h: float, floor_idx: int,
     ) -> List[OrthoRoom]:
-        """Pack rooms into a row with minimum widths, filling available space."""
+        """Pack rooms into a row. Width = area/height for accurate visual area."""
         if not rooms or h <= 0:
             return []
 
         result = []
         gap = 0.3
 
-        # Fixed-width rooms (stairs, toilets)
-        fixed_w = 0
-        flex_rooms = []
-        for room in rooms:
-            rt = self._rt(room)
-            if rt == 'staircase':
-                fixed_w += self.STAIR_W + gap
-            elif rt == 'toilet':
-                fixed_w += self.TOILET_W + gap
-            else:
-                flex_rooms.append(room)
-
-        available = total_w - fixed_w - gap
-        if available < self.MIN_ROOM_W * max(1, len(flex_rooms)):
-            available = self.MIN_ROOM_W * max(1, len(flex_rooms))
-
-        # Proportionally distribute remaining width, preserving input order
-        total_area = sum(getattr(r, 'area', 50) for r in flex_rooms)
-        if total_area <= 0:
-            total_area = len(flex_rooms)
-
-        flex_index = 0
-        cx = x0
+        # Compute exact widths: w = area / h
+        computed = []
+        fixed_total = 0.0
         for room in rooms:
             rt = self._rt(room)
             if rt == 'staircase':
                 w = self.STAIR_W
+                fixed_total += w + gap
             elif rt == 'toilet':
                 w = self.TOILET_W
+                fixed_total += w + gap
             else:
                 area = getattr(room, 'area', 50)
-                w = max(self.MIN_ROOM_W, (area / total_area) * available) if total_area > 0 else 5.0
+                w = max(self.MIN_ROOM_W, area / h) if h > 0 else self.MIN_ROOM_W
+            computed.append((room, rt, w))
 
-            w = min(w, (x0 + total_w) - cx - gap)
-            if w < 2.0:
+        flex_total = sum(w for _, _, w in computed) - (fixed_total - gap * len([r for r in rooms if self._rt(r) not in ('staircase','toilet')]))
+        flex_total += gap * len(computed)  # Add gaps
+
+        available = total_w - gap
+        # Scale if needed
+        if flex_total > 0:
+            scale = min(1.0, available / flex_total)
+        else:
+            scale = 1.0
+
+        cx = x0
+        for room, rt, w in computed:
+            w_scaled = w * scale
+            w_scaled = min(w_scaled, (x0 + total_w) - cx - gap)
+            if w_scaled < 2.0:
                 continue
 
             result.append(OrthoRoom(
-                room_id=getattr(room, 'room_id', self._rt(room)),
-                room_type=self._rt(room),
-                x=cx, y=y0, width=w - gap, height=h,
+                room_id=getattr(room, 'room_id', rt),
+                room_type=rt,
+                x=cx, y=y0, width=w_scaled - gap, height=h,
                 floor=floor_idx,
-                area=getattr(room, 'area', w * h),
-                color=ROOM_COLORS.get(self._rt(room), '#CCCCCC'),
+                area=getattr(room, 'area', w_scaled * h),
+                color=ROOM_COLORS.get(rt, '#CCCCCC'),
             ))
-            cx += w
+            cx += w_scaled
 
         return result
 

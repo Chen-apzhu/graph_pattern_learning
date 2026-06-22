@@ -276,21 +276,30 @@ class Trainer:
         else:
             auc = 1.0
 
+        # R-squared (coefficient of determination)
+        ss_res = ((targets_t - preds_t) ** 2).sum()
+        ss_tot = ((targets_t - targets_t.mean()) ** 2).sum()
+        r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
+
         results = {
             'mse': mse,
             'mae': mae,
             'auc': auc,
+            'r2': r2,
             'mean_pred': preds_t.mean().item(),
             'mean_target': targets_t.mean().item(),
+            'pred_std': preds_t.std().item(),
+            'target_std': targets_t.std().item(),
             'num_graphs': len(preds),
         }
 
         print(f"\nTest Results ({results['num_graphs']} graphs):")
         print(f"  MSE:        {mse:.4f}")
         print(f"  MAE:        {mae:.4f}")
+        print(f"  R2:         {r2:.4f}")
         print(f"  AUC:        {auc:.4f}")
-        print(f"  Mean pred:  {preds_t.mean().item():.4f}")
-        print(f"  Mean target:{targets_t.mean().item():.4f}")
+        print(f"  Mean pred:  {preds_t.mean().item():.4f}  (std={preds_t.std().item():.4f})")
+        print(f"  Mean target:{targets_t.mean().item():.4f}  (std={targets_t.std().item():.4f})")
 
         return results
 
