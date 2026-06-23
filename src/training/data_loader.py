@@ -54,7 +54,12 @@ class SchoolDataLoader:
 
     def __getitem__(self, idx: int) -> Tuple:
         """
-        Returns (hetero_data, quality_score, metadata_dict).
+        Returns (hetero_data, score_dict, metadata_dict).
+
+        score_dict contains:
+          - Per-task scores: daylight_quality, circulation_efficiency, etc.
+          - overall_quality: aggregated quality score (for multi-task training)
+          - 'score': legacy scalar (backward compat)
         """
         pt_file = self.files[self._indices[idx]]
         bundle = torch.load(str(pt_file), weights_only=False)
@@ -62,19 +67,24 @@ class SchoolDataLoader:
         hetero_data = bundle['hetero_data']
         metadata = bundle.get('metadata', {})
 
-        # Use quality metrics if available (new), fallback to constraint score
         quality = metadata.get('quality', None)
         if quality is not None and isinstance(quality, dict):
-            from metrics.quality_metrics import QualityMetrics
-            score = torch.tensor(QualityMetrics.aggregate(quality), dtype=torch.float32)
+            score_dict = {}
+            for k, v in quality.items():
+                score_dict[k] = torch.tensor(v, dtype=torch.float32)
+            score_dict['overall_quality'] = torch.tensor(
+                metadata.get('quality_score', 0.5), dtype=torch.float32
+            )
+            score_dict['score'] = score_dict['overall_quality']  # legacy compat
         elif 'quality_score' in metadata:
-            score = torch.tensor(metadata['quality_score'], dtype=torch.float32)
+            s = torch.tensor(metadata['quality_score'], dtype=torch.float32)
+            score_dict = {'overall_quality': s, 'score': s}
         else:
-            # Backward compat: compute from constraint validation
             validation = metadata.get('validation', {})
-            score = compute_quality_score(validation)
+            s = compute_quality_score(validation)
+            score_dict = {'overall_quality': s, 'score': s}
 
-        return hetero_data, score, metadata
+        return hetero_data, score_dict, metadata
 
     def on_epoch_end(self):
         """Shuffle indices (call after each epoch)."""
@@ -97,8 +107,14 @@ class SchoolDataLoader:
         scores = []
         for pt_file in files:
             bundle = torch.load(str(pt_file), weights_only=False)
-            validation = bundle.get('metadata', {}).get('validation', {})
-            scores.append(compute_quality_score(validation).item())
+            metadata = bundle.get('metadata', {})
+            quality = metadata.get('quality')
+            if quality:
+                from metrics.quality_metrics import QualityMetrics
+                scores.append(QualityMetrics.aggregate(quality))
+            else:
+                validation = metadata.get('validation', {})
+                scores.append(compute_quality_score(validation).item())
 
         scores_t = torch.tensor(scores)
         return {

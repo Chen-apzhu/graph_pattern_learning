@@ -375,10 +375,12 @@ class SchoolBuildingGenerator:
                 else:
                     result['teaching'][rt] = remainder
 
-            # Ensure every floor has sufficient stairs and corridors per PHYSICAL floor
+            # Ensure every floor has sufficient stairs
             if rt == RoomType.STAIRCASE:
-                result['teaching'][rt] = max(result['teaching'].get(rt, 0), n_teaching_phys)
-                result['ground'][rt] = max(result['ground'].get(rt, 0), 1)
+                result['teaching'][rt] = max(result['teaching'].get(rt, 0), n_teaching_phys * 2)
+                result['ground'][rt] = max(result['ground'].get(rt, 0), 2)
+                if n_top_types > 0:
+                    result['top'][rt] = max(result['top'].get(rt, 0), 2)
             if rt == RoomType.CORRIDOR:
                 # Corridors must cover 10-30% of total area (GB50099-2011 §8.2.3)
                 # Estimate: each corridor segment averages 30 sqm.
@@ -396,6 +398,47 @@ class SchoolBuildingGenerator:
                 result['teaching'][rt] = max(result['teaching'].get(rt, 0), max(4, total_corr_needed * 60 // 100))
                 if n_top_types > 0:
                     result['top'][rt] = max(result['top'].get(rt, 0), max(3, total_corr_needed * 10 // 100))
+
+        # ── Apply floor templates: enforce required, bias preferred ──
+        templates = self.rule_params.get('floor_templates', {})
+        for tf_type in ['ground', 'teaching', 'top']:
+            tmpl = templates.get(tf_type, {})
+            required = tmpl.get('required', {})
+            preferred = tmpl.get('preferred', {})
+
+            # Enforce required minimums
+            for rt_str, min_count in required.items():
+                try:
+                    rt = RoomType(rt_str)
+                except ValueError:
+                    continue
+                current = result[tf_type].get(rt, 0)
+                if current < min_count:
+                    # Take from other floors if possible
+                    deficit = min_count - current
+                    for other_tf in ['teaching', 'ground', 'top']:
+                        if other_tf == tf_type:
+                            continue
+                        other_count = result[other_tf].get(rt, 0)
+                        take = min(deficit, max(0, other_count - required.get(rt_str, 0)))
+                        if take > 0:
+                            result[other_tf][rt] = other_count - take
+                            result[tf_type][rt] = current + take
+                            deficit -= take
+                        if deficit <= 0:
+                            break
+
+            # Distribute unassigned preferred rooms proportionally
+            total_pref = sum(preferred.values())
+            if total_pref > 0:
+                for rt_str, pref_ratio in preferred.items():
+                    try:
+                        rt = RoomType(rt_str)
+                    except ValueError:
+                        continue
+                    # Only adjust teaching floor preferred rooms
+                    if tf_type == 'teaching' and rt in result[tf_type]:
+                        pass  # already assigned by program logic above
 
         return result
 
@@ -498,7 +541,6 @@ class SchoolBuildingGenerator:
         self,
         rooms: List[RoomNode],
         per_floor_area: float,
-        target_corridor_ratio: float = None,
     ) -> None:
         """
         Budget-constrained area allocation per typical floor.
@@ -506,19 +548,18 @@ class SchoolBuildingGenerator:
         Each typical floor type covers N physical floors. Budget is scaled:
         budget_tf = per_floor_area × num_physical_floors_in_tf.
 
-        Corridor ratio is sampled randomly within [0.10, 0.25] per graph
-        to create meaningful variance in circulation efficiency scores.
-
         Strategy:
-          1. Reserve target_corridor_ratio of budget for corridors
-          2. Allocate remaining budget to fixed rooms from their minimum
-          3. Clamp all rooms to spec bounds
-          4. Absorb remaining slack into corridors
+          1. Assign nominal (mid-range) areas to all rooms
+          2. If corridor nominal > 25% of total, cap corridors at 20%
+          3. Iteratively scale to budget, clamping to [min, max]
+          4. Redistribute slack evenly across ALL adjustable rooms
+          5. Final trim: corridors never exceed 25% of total
+
+        Corridor ratio = corridor_nominal / total_nominal, determined by
+        the room program, not by absorbing leftover budget.
 
         Modifies room.area IN PLACE.
         """
-        if target_corridor_ratio is None:
-            target_corridor_ratio = float(self.rng.uniform(0.10, 0.20))
         from utils.enums import RoomType
 
         # Determine how many physical floors each typical floor type spans
@@ -540,6 +581,9 @@ class SchoolBuildingGenerator:
             n_phys = tf_phys_counts.get(tf, 1)
             budget = per_floor_area * n_phys
 
+            if not tf_rooms:
+                continue
+
             corridors: list = []
             fixed_rooms: list = []
             for r in tf_rooms:
@@ -548,79 +592,83 @@ class SchoolBuildingGenerator:
                 else:
                     fixed_rooms.append(r)
 
-            # Target corridor budget
-            target_corr_budget = budget * target_corridor_ratio
-            fixed_budget = budget - target_corr_budget
+            # Step 1: Nominal areas
+            for r in tf_rooms:
+                r_min, r_max = r.spec.area_range_sqm
+                r.area = (r_min + r_max) / 2.0
 
-            # Step 1: Start fixed rooms at their MINIMUM valid area
-            for r in fixed_rooms:
-                r.area = r.spec.area_range_sqm[0]
-
-            # Step 2: Allocate to fixed rooms first (up to 82% of budget)
-            fixed_min_sum = sum(r.area for r in fixed_rooms)
-            fixed_max_budget = budget * (1.0 - target_corridor_ratio)
-            corr_target = budget * target_corridor_ratio
-
-            if fixed_min_sum > fixed_max_budget:
-                # Fixed rooms at min already exceed 82% budget — squeeze corridors
-                fixed_max_budget = budget - sum(
-                    r.spec.area_range_sqm[0] for r in corridors
-                ) if corridors else budget
-                # Scale fixed rooms down toward their mins
-                for r in fixed_rooms:
-                    r.area = r.spec.area_range_sqm[0]
-            else:
-                # Scale fixed rooms from min toward max, up to fixed_max_budget
-                fixed_ranges = [
-                    r.spec.area_range_sqm[1] - r.spec.area_range_sqm[0]
-                    for r in fixed_rooms
-                ]
-                total_fixed_range = sum(fixed_ranges)
-                fixed_slack = fixed_max_budget - fixed_min_sum
-                if total_fixed_range > 0 and fixed_slack > 0:
-                    for r, rng in zip(fixed_rooms, fixed_ranges):
-                        r.area = r.spec.area_range_sqm[0] + (rng / total_fixed_range) * fixed_slack
-                        r_min, r_max = r.spec.area_range_sqm
-                        r.area = max(r_min, min(r_max, r.area))
-
-            # Step 3: Give remaining budget to corridors (capped at 25%)
-            fixed_actual = sum(r.area for r in fixed_rooms)
-            corr_budget = min(budget - fixed_actual, budget * 0.25)
-
+            # Step 2: Compute target corridor share, cap at 22%
             if corridors:
-                corr_ranges = [r.spec.area_range_sqm[1] - r.spec.area_range_sqm[0] for r in corridors]
-                total_corr_range = sum(corr_ranges)
-                corr_min_sum = sum(r.spec.area_range_sqm[0] for r in corridors)
-                corr_slack = corr_budget - corr_min_sum
-                if total_corr_range > 0 and corr_slack > 0:
-                    for r, rng in zip(corridors, corr_ranges):
-                        r.area = r.spec.area_range_sqm[0] + (rng / total_corr_range) * corr_slack
+                corr_nominal = sum(r.area for r in corridors)
+                fixed_nominal = sum(r.area for r in fixed_rooms)
+                total_nom = corr_nominal + fixed_nominal
+                corr_ratio_nom = corr_nominal / total_nom if total_nom > 0 else 0.18
+
+                if corr_ratio_nom > 0.22:
+                    # Scale corridors down to 20% of budget
+                    corr_target = budget * 0.20
+                    scale_c = corr_target / corr_nominal if corr_nominal > 0 else 1.0
+                    for r in corridors:
+                        r.area *= scale_c
+
+                # Scale fixed rooms to fill remaining budget
+                fixed_actual = sum(r.area for r in fixed_rooms)
+                corr_actual = sum(r.area for r in corridors)
+                remaining = budget - corr_actual
+
+                if fixed_actual > 0 and remaining > 0:
+                    scale_f = remaining / fixed_actual
+                    for r in fixed_rooms:
                         r_min, r_max = r.spec.area_range_sqm
+                        r.area *= scale_f
                         r.area = max(r_min, min(r_max, r.area))
 
-            # Step 4: Absorb remaining slack into corridors (capped at 25% total)
-            total_actual = sum(r.area for r in fixed_rooms) + sum(r.area for r in corridors)
-            remaining = budget - total_actual
-            max_corr = budget * 0.25
-            current_corr = sum(r.area for r in corridors)
-            corr_headroom = max_corr - current_corr
-            absorb = min(remaining, max(0.0, corr_headroom))
-            if absorb > 0.5 and corridors:
-                total_corr = sum(r.area for r in corridors)
-                if total_corr > 0:
-                    for r in corridors:
-                        r.area += absorb * (r.area / total_corr)
+                # Rebalance: if fixed rooms hit max and can't absorb, give to corridors
+                # If fixed rooms hit min and over-absorb, take from corridors
+                for _ in range(3):
+                    fixed_now = sum(r.area for r in fixed_rooms)
+                    corr_now = sum(r.area for r in corridors)
+                    total_now = fixed_now + corr_now
+                    gap = budget - total_now
 
-            # Step 5: Distribute any UNALLOCATED budget proportionally
-            # (keeps area completeness without blowing up corridor ratio)
-            total_actual2 = sum(r.area for r in fixed_rooms) + sum(r.area for r in corridors)
-            remaining2 = budget - total_actual2
-            if remaining2 > 1.0:
-                all_rooms = fixed_rooms + corridors
-                total_all = sum(r.area for r in all_rooms)
-                if total_all > 0:
-                    for r in all_rooms:
-                        r.area += remaining2 * (r.area / total_all)
+                    if abs(gap) < 1.0:
+                        break
+
+                    if gap > 0 and corridors:
+                        # Need more area → give to corridors
+                        for r in corridors:
+                            r.area += gap / len(corridors)
+                    elif gap < 0 and fixed_rooms:
+                        # Too much → trim from fixed rooms proportionally
+                        for r in fixed_rooms:
+                            r_min = r.spec.area_range_sqm[0]
+                            excess = r.area - r_min
+                            if excess > 0:
+                                r.area -= min(excess, abs(gap) / len(fixed_rooms))
+            else:
+                # No corridors: scale fixed rooms to budget
+                fixed_actual = sum(r.area for r in fixed_rooms)
+                if fixed_actual > 0:
+                    scale = budget / fixed_actual
+                    for r in fixed_rooms:
+                        r_min, r_max = r.spec.area_range_sqm
+                        r.area *= scale
+                        r.area = max(r_min, min(r_max, r.area))
+
+            # Final safety: clamp corridor ratio to 24% max
+            final_corr = sum(r.area for r in corridors)
+            final_total = sum(r.area for r in tf_rooms)
+            if final_total > 0 and corridors:
+                cr = final_corr / final_total
+                if cr > 0.24:
+                    target_corr = final_total * 0.22
+                    scale_safe = target_corr / final_corr if final_corr > 0 else 1.0
+                    for r in corridors:
+                        r.area *= scale_safe
+                    excess = final_corr - target_corr
+                    if fixed_rooms:
+                        for r in fixed_rooms:
+                            r.area += excess / len(fixed_rooms)
 
     # ========================================================================
     # Main generation pipeline

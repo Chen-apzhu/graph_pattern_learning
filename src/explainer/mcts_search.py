@@ -90,13 +90,14 @@ class SubgraphMCTS:
 
     def __init__(
         self,
-        scorer,                           # SchoolGraphScorer instance
+        scorer,                           # MultiTaskScorer or SchoolGraphScorer
         exploration_constant: float = 1.414,
         max_depth: int = 20,
         w_score: float = 1.0,             # Weight for GNN score change
         w_sparsity: float = 0.3,          # Weight for sparsity bonus
         w_connectivity: float = 2.0,      # Penalty for breaking connectivity
         device: str = 'cpu',
+        target_metric: str = 'overall_quality',  # Which task head to explain
     ):
         self.scorer = scorer
         self.c = exploration_constant
@@ -105,6 +106,7 @@ class SubgraphMCTS:
         self.w_sparsity = w_sparsity
         self.w_connectivity = w_connectivity
         self.device = torch.device(device)
+        self.target_metric = target_metric
 
         # Will be set during search
         self._baseline_score: float = 0.0
@@ -131,10 +133,14 @@ class SubgraphMCTS:
         """
         self._original_data = hetero_data
 
-        # Compute baseline score
+        # Compute baseline score (supports both single-task and multi-task scorers)
         self.scorer.eval()
         with torch.no_grad():
-            self._baseline_score = self.scorer(hetero_data.to(self.device)).item()
+            output = self.scorer(hetero_data.to(self.device))
+            if isinstance(output, dict):
+                self._baseline_score = output.get(self.target_metric, output.get('overall_quality', 0.5)).item()
+            else:
+                self._baseline_score = output.item()
 
         # Build room/edge index from the data
         self._build_index()
@@ -326,11 +332,15 @@ class SubgraphMCTS:
         except Exception:
             return -1.0
 
-        # Score the masked graph
+        # Score the masked graph (supports both single and multi-task)
         self.scorer.eval()
         with torch.no_grad():
             try:
-                sub_score = self.scorer(masked_data.to(self.device)).item()
+                output = self.scorer(masked_data.to(self.device))
+                if isinstance(output, dict):
+                    sub_score = output.get(self.target_metric, output.get('overall_quality', 0.5)).item()
+                else:
+                    sub_score = output.item()
             except Exception:
                 return -1.0
 

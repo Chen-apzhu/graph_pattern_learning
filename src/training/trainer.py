@@ -23,21 +23,17 @@ import torch.optim as optim
 # Ensure src is on path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-from models.scorer import SchoolGraphScorer
-from models.losses import (
-    fire_exit_loss,
-    circulation_loss,
-    daylight_loss,
-    connectivity_loss,
-)
+from models.multitask_scorer import MultiTaskScorer
+from models.ranking_loss import multitask_ranking_loss
 from training.data_loader import SchoolDataLoader
 
 
 class Trainer:
     """
-    Trains the SchoolGraphScorer model.
+    Trains the MultiTaskScorer model with per-task quality labels.
 
-    Training uses per-graph (batch_size=1) due to variable graph sizes.
+    Loss = L_MSE + lambda_rank * L_rank
+    Training uses per-graph (batch_size=1) with accumulated batch for ranking.
     """
 
     def __init__(
@@ -48,12 +44,12 @@ class Trainer:
         dropout: float = 0.2,
         lr: float = 1e-3,
         device: str = None,
-        lambda_fire: float = 0.1,
-        lambda_conn: float = 0.05,
-        lambda_circ: float = 0.05,
-        lambda_daylight: float = 0.05,
+        lambda_rank: float = 0.1,
+        rank_accumulate: int = 16,
     ):
         self.dataset_dir = dataset_dir
+        self.lambda_rank = lambda_rank
+        self.rank_accumulate = rank_accumulate
 
         # Device
         if device is None:
@@ -62,7 +58,7 @@ class Trainer:
             self.device = torch.device(device)
 
         # Model
-        self.model = SchoolGraphScorer(
+        self.model = MultiTaskScorer(
             hidden_dim=hidden_dim,
             num_layers=num_layers,
             dropout=dropout,
@@ -74,12 +70,6 @@ class Trainer:
             self.optimizer, mode='min', factor=0.5, patience=10
         )
 
-        # Loss weights
-        self.lambda_fire = lambda_fire
-        self.lambda_conn = lambda_conn
-        self.lambda_circ = lambda_circ
-        self.lambda_daylight = lambda_daylight
-
         # Data
         self.train_loader = SchoolDataLoader(dataset_dir, 'train')
         self.val_loader = SchoolDataLoader(dataset_dir, 'val', shuffle=False)
@@ -89,70 +79,43 @@ class Trainer:
         self.val_losses: list = []
         self.best_val_loss = float('inf')
 
-    def _compute_constraint_losses(
-        self,
-        data,
-        pred_score: torch.Tensor,
-    ) -> dict:
-        """Compute all constraint-specific losses."""
-        room_x = data['room'].x.to(self.device)
-
-        losses = {}
-
-        # Fire exit loss
-        try:
-            phys_ei = data['room', 'physical_connects', 'room'].edge_index.to(self.device)
-        except (KeyError, AttributeError):
-            phys_ei = torch.zeros(2, 0, dtype=torch.long, device=self.device)
-        losses['fire'] = fire_exit_loss(room_x, phys_ei)
-
-        # Circulation loss
-        losses['circ'] = circulation_loss(room_x)
-
-        # Daylight loss
-        try:
-            sight_rr = data['room', 'sight_lines', 'room'].edge_index.to(self.device)
-        except (KeyError, AttributeError):
-            sight_rr = torch.zeros(2, 0, dtype=torch.long, device=self.device)
-        try:
-            sight_re = data['room', 'sight_lines', 'environment'].edge_index.to(self.device)
-        except (KeyError, AttributeError):
-            sight_re = torch.zeros(2, 0, dtype=torch.long, device=self.device)
-        losses['daylight'] = daylight_loss(room_x, sight_rr, sight_re)
-
-        # Connectivity loss
-        losses['conn'] = connectivity_loss(phys_ei, data['room'].num_nodes)
-
-        return losses
-
     def train_epoch(self, epoch: int) -> float:
-        """Train one epoch. Returns average loss."""
+        """Train one epoch with ranking loss accumulation."""
         self.model.train()
         total_loss = 0.0
         n_graphs = 0
 
-        for data, target_score, _metadata in self.train_loader.iter_all():
-            data = data.to(self.device)
-            target_score = target_score.to(self.device)
+        # Accumulate predictions for pairwise ranking
+        acc_preds = {name: [] for name in self.model.get_task_names()}
+        acc_targets = {name: [] for name in self.model.get_task_names()}
 
-            # Forward
-            pred_score = self.model(data)
+        for data, target_dict, _metadata in self.train_loader.iter_all():
+            data = data.to(self.device)
+            targets = {k: v.to(self.device) for k, v in target_dict.items()
+                      if isinstance(v, torch.Tensor)}
+            predictions = self.model(data)
 
             # MSE loss
-            loss_mse = nn.functional.mse_loss(pred_score, target_score)
+            loss_mse = self.model.compute_loss(predictions, targets)
 
-            # Constraint losses
-            constr_losses = self._compute_constraint_losses(data, pred_score)
+            # Accumulate for ranking
+            for name in self.model.get_task_names():
+                if name in predictions and name in targets:
+                    acc_preds[name].append(predictions[name].detach())
+                    acc_targets[name].append(targets[name])
 
-            loss = (
-                loss_mse
-                + self.lambda_fire * constr_losses['fire']
-                + self.lambda_conn * constr_losses['conn']
-                + self.lambda_circ * constr_losses['circ']
-                + self.lambda_daylight * constr_losses['daylight']
-            )
+            # Apply ranking loss every rank_accumulate steps
+            loss_rank = torch.tensor(0.0, device=self.device)
+            if len(acc_preds[list(acc_preds.keys())[0]]) >= self.rank_accumulate:
+                batch_preds = {k: torch.stack(v) for k, v in acc_preds.items()}
+                batch_targets = {k: torch.stack(v) for k, v in acc_targets.items()}
+                loss_rank = multitask_ranking_loss(batch_preds, batch_targets)
+                # Clear accumulators
+                acc_preds = {name: [] for name in self.model.get_task_names()}
+                acc_targets = {name: [] for name in self.model.get_task_names()}
 
-            # Backward
+            loss = loss_mse + self.lambda_rank * loss_rank
+
             self.optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), 1.0)
@@ -168,19 +131,18 @@ class Trainer:
 
     @torch.no_grad()
     def validate(self) -> float:
-        """Validate on val set. Returns average loss."""
+        """Validate on val set. Returns average multi-task loss."""
         self.model.eval()
         total_loss = 0.0
         n_graphs = 0
 
-        for data, target_score, _metadata in self.val_loader.iter_all():
+        for data, target_dict, _metadata in self.val_loader.iter_all():
             data = data.to(self.device)
-            target_score = target_score.to(self.device)
-
-            pred_score = self.model(data)
-            loss_mse = nn.functional.mse_loss(pred_score, target_score)
-
-            total_loss += loss_mse.item()
+            targets = {k: v.to(self.device) for k, v in target_dict.items()
+                      if isinstance(v, torch.Tensor)}
+            predictions = self.model(data)
+            loss = self.model.compute_loss(predictions, targets)
+            total_loss += loss.item()
             n_graphs += 1
 
         avg_loss = total_loss / max(1, n_graphs)
@@ -243,63 +205,43 @@ class Trainer:
         print(f"  Model saved to: {save_path}")
 
     def evaluate_test(self, test_dir: str = None) -> dict:
-        """Evaluate on the test set."""
+        """Evaluate on the test set. Reports per-task R2."""
         if test_dir is None:
             test_loader = SchoolDataLoader(self.dataset_dir, 'test', shuffle=False)
         else:
             test_loader = SchoolDataLoader(test_dir, 'test', shuffle=False)
 
         self.model.eval()
-        preds = []
-        targets = []
-        all_meta = []
+        task_preds = {}
+        task_targets = {}
 
-        for data, target, meta in test_loader.iter_all():
+        for data, target_dict, meta in test_loader.iter_all():
             data = data.to(self.device)
             with torch.no_grad():
-                pred = self.model(data)
-            preds.append(pred.cpu().item())
-            targets.append(target.item())
-            all_meta.append(meta)
+                predictions = self.model(data)
+            for k, v in predictions.items():
+                task_preds.setdefault(k, []).append(v.cpu().item())
+            for k, v in target_dict.items():
+                if isinstance(v, torch.Tensor):
+                    task_targets.setdefault(k, []).append(v.item())
 
-        preds_t = torch.tensor(preds)
-        targets_t = torch.tensor(targets)
-
-        mse = nn.functional.mse_loss(preds_t, targets_t).item()
-        mae = (preds_t - targets_t).abs().mean().item()
-
-        # AUC: treat score > 0.8 as "high quality"
-        high_quality = (targets_t > 0.8).float()
-        if high_quality.sum() > 0 and high_quality.sum() < len(high_quality):
-            from sklearn.metrics import roc_auc_score
-            auc = roc_auc_score(high_quality.numpy(), preds_t.numpy())
-        else:
-            auc = 1.0
-
-        # R-squared (coefficient of determination)
-        ss_res = ((targets_t - preds_t) ** 2).sum()
-        ss_tot = ((targets_t - targets_t.mean()) ** 2).sum()
-        r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
-
-        results = {
-            'mse': mse,
-            'mae': mae,
-            'auc': auc,
-            'r2': r2,
-            'mean_pred': preds_t.mean().item(),
-            'mean_target': targets_t.mean().item(),
-            'pred_std': preds_t.std().item(),
-            'target_std': targets_t.std().item(),
-            'num_graphs': len(preds),
-        }
-
+        results = {'num_graphs': len(task_preds.get('overall_quality', []))}
         print(f"\nTest Results ({results['num_graphs']} graphs):")
-        print(f"  MSE:        {mse:.4f}")
-        print(f"  MAE:        {mae:.4f}")
-        print(f"  R2:         {r2:.4f}")
-        print(f"  AUC:        {auc:.4f}")
-        print(f"  Mean pred:  {preds_t.mean().item():.4f}  (std={preds_t.std().item():.4f})")
-        print(f"  Mean target:{targets_t.mean().item():.4f}  (std={targets_t.std().item():.4f})")
+        print(f"  {'Task':<28} {'R2':>8} {'MAE':>8} {'PredMean':>10} {'TargetMean':>10}")
+        print(f"  {'-'*28} {'-'*8} {'-'*8} {'-'*10} {'-'*10}")
+
+        for task_name in self.model.get_task_names():
+            if task_name not in task_preds or task_name not in task_targets:
+                continue
+            p = torch.tensor(task_preds[task_name])
+            t = torch.tensor(task_targets[task_name])
+            mae = (p - t).abs().mean().item()
+            ss_res = ((t - p) ** 2).sum()
+            ss_tot = ((t - t.mean()) ** 2).sum()
+            r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else 0.0
+            results[f'{task_name}_r2'] = r2
+            results[f'{task_name}_mae'] = mae
+            print(f"  {task_name:<28} {r2:>8.4f} {mae:>8.4f} {p.mean():>10.4f} {t.mean():>10.4f}")
 
         return results
 

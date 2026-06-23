@@ -49,26 +49,31 @@ class SubgraphRunner:
         split: str = 'test',
         n_simulations: int = 100,
         max_graphs: int = None,
+        target_metrics: list = None,
     ) -> Tuple[List[nx.Graph], List[dict]]:
         """
         Run MCTS on each graph in a dataset split.
 
         Args:
             split: 'train', 'val', or 'test'.
-            n_simulations: MCTS simulations per graph.
+            n_simulations: MCTS simulations per graph per metric.
             max_graphs: Limit number of graphs (None = all).
+            target_metrics: List of metric names to explain (default: ['overall_quality']).
 
         Returns:
             (subgraphs, metadata) where subgraphs is a list of NetworkX graphs
             and metadata contains per-subgraph info.
         """
+        if target_metrics is None:
+            target_metrics = ['overall_quality']
         split_dir = self.dataset_dir / split
         pt_files = sorted(split_dir.glob('*.pt'))
         if max_graphs:
             pt_files = pt_files[:max_graphs]
 
         print(f"Running MCTS on {len(pt_files)} graphs from {split} split...")
-        print(f"  Simulations per graph: {n_simulations}")
+        print(f"  Target metrics: {target_metrics}")
+        print(f"  Simulations per graph per metric: {n_simulations}")
 
         all_subgraphs: List[nx.Graph] = []
         all_metadata: List[dict] = []
@@ -79,35 +84,35 @@ class SubgraphRunner:
             hetero_data = bundle['hetero_data']
             meta = bundle.get('metadata', {})
 
-            # Convert to SchoolGraphData for NX access
             sg = SchoolGraphData(hetero_data)
             full_nx = sg.to_networkx()
 
-            # Run MCTS
-            try:
-                best_state, best_reward = self.mcts.search(
-                    hetero_data,
-                    n_simulations=n_simulations,
-                    target_sparsity=0.4,
-                )
-            except Exception as e:
-                print(f"  [WARN] MCTS failed on {pt_file.name}: {e}")
-                continue
+            for metric in target_metrics:
+                self.mcts.target_metric = metric
+                try:
+                    best_state, best_reward = self.mcts.search(
+                        hetero_data,
+                        n_simulations=n_simulations,
+                        target_sparsity=0.4,
+                    )
+                except Exception as e:
+                    print(f"  [WARN] MCTS failed on {pt_file.name}/{metric}: {e}")
+                    continue
 
-            # Build subgraph from best state
-            sub_nx = self._state_to_nx(best_state, full_nx)
+                sub_nx = self._state_to_nx(best_state, full_nx)
 
-            if sub_nx.number_of_nodes() > 0:
-                all_subgraphs.append(sub_nx)
-                all_metadata.append({
-                    'source_graph': meta.get('graph_id', pt_file.stem),
-                    'school_size': meta.get('school_size', 'unknown'),
-                    'reward': best_reward,
-                    'subgraph_nodes': best_state.num_nodes,
-                    'subgraph_edges': best_state.num_edges,
-                    'baseline_score': self.mcts._baseline_score,
-                    'num_actions': best_state.num_actions_applied,
-                })
+                if sub_nx.number_of_nodes() > 0:
+                    all_subgraphs.append(sub_nx)
+                    all_metadata.append({
+                        'source_graph': meta.get('graph_id', pt_file.stem),
+                        'school_size': meta.get('school_size', 'unknown'),
+                        'target_metric': metric,
+                        'reward': best_reward,
+                        'subgraph_nodes': best_state.num_nodes,
+                        'subgraph_edges': best_state.num_edges,
+                        'baseline_score': self.mcts._baseline_score,
+                        'num_actions': best_state.num_actions_applied,
+                    })
 
             if (i + 1) % max(1, len(pt_files) // 5) == 0:
                 elapsed = time.time() - t_start

@@ -1,0 +1,115 @@
+{
+  "summary": {
+    "total": 9,
+    "significant": 0,
+    "sig_pct": 0.0,
+    "mean_delta": -0.0149,
+    "std_delta": 0.0138,
+    "max_positive": -0.001
+  },
+  "metadata": {
+    "dataset": "outputs/dataset_200_v13",
+    "n_sims": 40
+  },
+  "results": [
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0160_f5_s202",
+      "target_metric": "overall_quality",
+      "baseline_score": 0.5775,
+      "sub_score": 0.5786,
+      "delta_q": -0.0011,
+      "subgraph_nodes": 77,
+      "subgraph_edges": 189,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0160_f5_s202",
+      "target_metric": "fire_safety_margin",
+      "baseline_score": 0.705,
+      "sub_score": 0.7063,
+      "delta_q": -0.0013,
+      "subgraph_nodes": 77,
+      "subgraph_edges": 191,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0160_f5_s202",
+      "target_metric": "circulation_efficiency",
+      "baseline_score": 0.6216,
+      "sub_score": 0.6482,
+      "delta_q": -0.0266,
+      "subgraph_nodes": 77,
+      "subgraph_edges": 186,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0161_f4_s203",
+      "target_metric": "overall_quality",
+      "baseline_score": 0.5743,
+      "sub_score": 0.5753,
+      "delta_q": -0.001,
+      "subgraph_nodes": 71,
+      "subgraph_edges": 148,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0161_f4_s203",
+      "target_metric": "fire_safety_margin",
+      "baseline_score": 0.8194,
+      "sub_score": 0.8533,
+      "delta_q": -0.034,
+      "subgraph_nodes": 71,
+      "subgraph_edges": 148,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0161_f4_s203",
+      "target_metric": "circulation_efficiency",
+      "baseline_score": 0.8012,
+      "sub_score": 0.8138,
+      "delta_q": -0.0126,
+      "subgraph_nodes": 71,
+      "subgraph_edges": 142,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0162_f4_s204",
+      "target_metric": "overall_quality",
+      "baseline_score": 0.5741,
+      "sub_score": 0.5761,
+      "delta_q": -0.002,
+      "subgraph_nodes": 71,
+      "subgraph_edges": 149,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0162_f4_s204",
+      "target_metric": "fire_safety_margin",
+      "baseline_score": 0.82,
+      "sub_score": 0.8566,
+      "delta_q": -0.0366,
+      "subgraph_nodes": 72,
+      "subgraph_edges": 148,
+      "significant": false
+    },
+    {
+      "test_type": "remove",
+      "source_graph_id": "large_0162_f4_s204",
+      "target_metric": "circulation_efficiency",
+      "baseline_score": 0.802,
+      "sub_score": 0.8207,
+      "delta_q": -0.0187,
+      "subgraph_nodes": 71,
+      "subgraph_edges": 146,
+      "significant": false
+    }
+  ]
+}

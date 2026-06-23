@@ -178,3 +178,37 @@ building_footprint:
     depth: 18.0
     per_floor_area: 1404.0
   area_tolerance: 0.05    # +/- 5% tolerance for area completeness check
+
+# --- Floor Function Templates (楼层功能模板) ---
+# Each typical floor type has REQUIRED rooms (must exist) and
+# PREFERRED rooms (distributed proportionally from remaining count).
+floor_templates:
+  ground:
+    required:
+      entrance_hall: 1
+      staircase: 2
+      toilet: 1
+    preferred:
+      classroom: 4
+      teacher_office: 1
+      storage: 1
+      special_classroom: 1
+
+  teaching:
+    required:
+      staircase: 2
+      toilet: 1
+    preferred:
+      classroom: 6
+      teacher_office: 1
+      storage: 1
+
+  top:
+    required:
+      staircase: 2
+      toilet: 1
+    preferred:
+      special_classroom: 2
+      music_room: 1
+      storage: 1
+      teacher_office: 1

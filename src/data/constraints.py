@@ -70,6 +70,10 @@ class ConstraintValidator:
         # Area completeness config
         footprint = config.get('building_footprint', {})
         self._area_tolerance: float = footprint.get('area_tolerance', 0.05)
+
+        # Floor-level corridor ratio bounds
+        self.floor_corr_min: float = 0.10
+        self.floor_corr_max: float = 0.25
         # per_floor_area is NOT stored here — it's per school size, passed at call time
 
     # ======================================================================
@@ -490,6 +494,56 @@ class ConstraintValidator:
         return (len(violations) == 0, violations)
 
     # ======================================================================
+    # Floor Corridor Ratio Constraint (§4 硬约束, 逐层走廊比)
+    # ======================================================================
+
+    def check_floor_corridor_ratio(
+        self,
+        rooms: list,
+    ) -> Tuple[bool, List[str]]:
+        """
+        Floor-level corridor ratio constraint (Hard).
+
+        Reference: GB50099-2011 §8.2.3
+        For each typical floor, corridor_area / total_floor_area ∈ [0.10, 0.25].
+
+        Formula:
+            Group rooms by typical_floor (ground, teaching, top).
+            For each group:
+                ratio = Σ(r.area for corridor rooms) / Σ(r.area for all rooms)
+                If ratio < floor_corr_min or ratio > floor_corr_max → VIOLATION
+        """
+        violations: List[str] = []
+
+        tf_groups: dict = {}
+        for r in rooms:
+            tf = getattr(r, 'typical_floor', 'ground')
+            tf_groups.setdefault(tf, []).append(r)
+
+        for tf, tf_rooms in tf_groups.items():
+            total = sum(r.area for r in tf_rooms)
+            corr_total = sum(
+                r.area for r in tf_rooms
+                if getattr(r, 'room_type', None) and r.room_type.value == 'corridor'
+            )
+            if total > 0:
+                ratio = corr_total / total
+                if ratio < self.floor_corr_min:
+                    violations.append(
+                        f"[FLOOR_CORR] Typical floor '{tf}': corridor ratio "
+                        f"={ratio:.2%} < {self.floor_corr_min:.0%} min "
+                        f"(GB50099-2011 §8.2.3)."
+                    )
+                elif ratio > self.floor_corr_max:
+                    violations.append(
+                        f"[FLOOR_CORR] Typical floor '{tf}': corridor ratio "
+                        f"={ratio:.2%} > {self.floor_corr_max:.0%} max "
+                        f"(GB50099-2011 §8.2.3)."
+                    )
+
+        return (len(violations) == 0, violations)
+
+    # ======================================================================
     # Master validation
     # ======================================================================
 
@@ -532,6 +586,7 @@ class ConstraintValidator:
         results['area_completeness'] = self.check_area_completeness(
             rooms, num_floors or 3, per_floor_area
         )
+        results['floor_corridor_ratio'] = self.check_floor_corridor_ratio(rooms)
 
         return results
 
@@ -545,7 +600,7 @@ class ConstraintValidator:
         results: Dict[str, Tuple[bool, List[str]]]
     ) -> bool:
         """Check if all hard constraints passed (fire, daylight, acoustic, connectivity, area_completeness)."""
-        hard_keys = {'fire_exits', 'daylight', 'acoustic', 'connectivity', 'area_completeness'}
+        hard_keys = {'fire_exits', 'daylight', 'acoustic', 'connectivity', 'area_completeness', 'floor_corridor_ratio'}
         return all(
             results[k][0] for k in hard_keys if k in results
         )

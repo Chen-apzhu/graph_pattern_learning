@@ -393,7 +393,7 @@ class QualityMetrics:
     # ─────────────────────────────────────────────────────────────────
 
     DEFAULT_WEIGHTS = {
-        'daylight_quality': 1.0,
+        # daylight_quality: excluded — metric still under development
         'circulation_efficiency': 1.0,
         'fire_safety_margin': 1.0,
         'graph_robustness': 1.0,
