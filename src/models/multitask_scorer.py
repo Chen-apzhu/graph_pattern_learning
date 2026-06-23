@@ -32,12 +32,16 @@ from models.encoder import HeteroGNNEncoder
 # Task head definitions: name → (weight in overall score, description)
 # Note: daylight_quality excluded — daylight metric still under development
 TASK_HEADS = [
-    ('circulation_efficiency', 1.0, 'Circulation efficiency'),
-    ('fire_safety_margin',     1.0, 'Fire safety margin'),
-    ('graph_robustness',       1.0, 'Graph robustness (lambda_2)'),
-    ('path_redundancy',        1.0, 'Path redundancy (mesh vs tree)'),
-    ('zone_cohesion',          1.0, 'Zone cohesion (intra-zone edges)'),
-    ('overall_quality',        1.0, 'Overall quality (weighted average)'),
+    ('circulation_efficiency',  1.0, 'Circulation efficiency'),
+    ('fire_safety_margin',      1.0, 'Fire safety margin'),
+    ('graph_robustness',        1.0, 'Graph robustness (lambda_2)'),
+    ('path_redundancy',         1.0, 'Path redundancy (mesh vs tree)'),
+    ('zone_cohesion',           1.0, 'Zone cohesion (intra-zone edges)'),
+    ('stair_service_radius',    1.0, 'Stair service radius (local)'),
+    ('toilet_coverage',         1.0, 'Toilet coverage (local)'),
+    ('local_evacuation_loop',   1.0, 'Local evacuation loops'),
+    ('classroom_south_cluster', 1.0, 'Classroom south cluster (local)'),
+    ('overall_quality',         1.0, 'Overall quality (weighted average)'),
 ]
 
 

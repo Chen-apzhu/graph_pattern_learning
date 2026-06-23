@@ -389,6 +389,216 @@ class QualityMetrics:
         return float(1.0 - abs(same_zone - 0.4) / 0.4)
 
     # ─────────────────────────────────────────────────────────────────
+    # Local Quality Metrics (node-level → graph aggregate)
+    # These create LOCAL variance so MCTS can find precise subgraphs.
+    # ─────────────────────────────────────────────────────────────────
+
+    @staticmethod
+    def stair_service_radius(data) -> float:
+        """
+        Mean normalized BFS distance from each room to its nearest staircase.
+
+        Rooms far from staircases have poor evacuation service.
+        Normalized by max possible distance (n_rooms).
+
+        Range: [0, 1]. Lower = better (all rooms close to stairs).
+        """
+        n_r = data['room'].num_nodes
+        if n_r <= 1:
+            return 1.0
+
+        is_stair = data['room'].x[:, 9] > 0.5  # staircase one-hot index
+        stair_idx = is_stair.nonzero(as_tuple=True)[0].tolist()
+        if not stair_idx:
+            return 0.0
+
+        try:
+            phys_ei = data['room', 'physical_connects', 'room'].edge_index
+        except (KeyError, AttributeError):
+            return 0.0
+
+        # BFS from staircases outward to all rooms
+        distances = torch.full((n_r,), n_r, dtype=torch.float)
+        for si in stair_idx:
+            visited = {si}
+            queue = [(si, 0)]
+            while queue:
+                node, dist = queue.pop(0)
+                if dist < distances[node]:
+                    distances[node] = dist
+                neighbors = phys_ei[1, phys_ei[0] == node].tolist()
+                neighbors += phys_ei[0, phys_ei[1] == node].tolist()
+                for nb in neighbors:
+                    if nb not in visited:
+                        visited.add(nb)
+                        queue.append((nb, dist + 1))
+
+        # Exclude stairs themselves
+        non_stair = ~is_stair
+        if non_stair.sum() == 0:
+            return 1.0
+
+        mean_dist = distances[non_stair].mean().item()
+        score = 1.0 - (mean_dist / n_r)  # invert: close = high score
+        return float(max(0.0, min(1.0, score)))
+
+    @staticmethod
+    def toilet_coverage(data) -> float:
+        """
+        Proportion of rooms within 3 BFS steps of a toilet.
+
+        Range: [0, 1]. Higher = better toilet coverage.
+        """
+        n_r = data['room'].num_nodes
+        if n_r <= 1:
+            return 1.0
+
+        is_toilet = data['room'].x[:, 9] > 0.5
+        toilet_idx = is_toilet.nonzero(as_tuple=True)[0].tolist()
+        if not toilet_idx:
+            return 0.0
+
+        try:
+            phys_ei = data['room', 'physical_connects', 'room'].edge_index
+        except (KeyError, AttributeError):
+            return 0.0
+
+        min_dist = torch.full((n_r,), n_r, dtype=torch.float)
+        for ti in toilet_idx:
+            visited = {ti}
+            queue = [(ti, 0)]
+            while queue:
+                node, dist = queue.pop(0)
+                if dist < min_dist[node]:
+                    min_dist[node] = dist
+                neighbors = phys_ei[1, phys_ei[0] == node].tolist()
+                neighbors += phys_ei[0, phys_ei[1] == node].tolist()
+                for nb in neighbors:
+                    if nb not in visited:
+                        visited.add(nb)
+                        queue.append((nb, dist + 1))
+
+        covered = (min_dist <= 3).float()
+        non_toilet = ~is_toilet
+        if non_toilet.sum() == 0:
+            return 1.0
+        return float(covered[non_toilet].mean().item())
+
+    @staticmethod
+    def local_evacuation_loop(data) -> float:
+        """
+        Proportion of rooms that are part of at least one 3-cycle or
+        4-cycle in the physical graph. Being in a cycle means redundant
+        evacuation routes (local loop).
+
+        Range: [0, 1]. Higher = more rooms have local evacuation loops.
+        """
+        try:
+            phys_ei = data['room', 'physical_connects', 'room'].edge_index
+        except (KeyError, AttributeError):
+            return 0.0
+
+        n_r = data['room'].num_nodes
+        if n_r <= 2 or phys_ei.numel() < 6:
+            return 0.0
+
+        # Build adjacency
+        adj = [[] for _ in range(n_r)]
+        for u, v in phys_ei.t().tolist():
+            adj[u].append(v)
+            adj[v].append(u)
+
+        in_cycle = torch.zeros(n_r, dtype=torch.bool)
+        # Check for 3-cycles (triangles): u-v-w-u
+        for u in range(n_r):
+            for v in adj[u]:
+                if v <= u:
+                    continue
+                for w in adj[v]:
+                    if w <= v:
+                        continue
+                    if u in adj[w]:
+                        in_cycle[u] = True
+                        in_cycle[v] = True
+                        in_cycle[w] = True
+
+        # Check for 4-cycles (squares): u-v-w-x-u
+        for u in range(n_r):
+            if in_cycle[u]:
+                continue
+            for v in adj[u]:
+                for w in adj[v]:
+                    if w == u:
+                        continue
+                    for x in adj[w]:
+                        if x == v or x == u:
+                            continue
+                        if u in adj[x]:
+                            in_cycle[u] = True
+                            in_cycle[v] = True
+                            in_cycle[w] = True
+                            in_cycle[x] = True
+                            break
+                    if in_cycle[u]:
+                        break
+                if in_cycle[u]:
+                    break
+
+        return float(in_cycle.float().mean().item())
+
+    @staticmethod
+    def classroom_south_cluster(data) -> float:
+        """
+        Proportion of classrooms that are in a contiguous south-facing
+        cluster (connected via corridors with sight_lines to south).
+
+        Approximated by checking if a classroom's 2-hop neighborhood
+        contains another classroom with sight_lines edge.
+
+        Range: [0, 1]. Higher = better daylight clustering.
+        """
+        n_r = data['room'].num_nodes
+        if n_r <= 1:
+            return 1.0
+
+        is_cls = data['room'].x[:, 0] > 0.5  # classroom one-hot
+        cls_idx = is_cls.nonzero(as_tuple=True)[0].tolist()
+        if len(cls_idx) <= 1:
+            return 1.0
+
+        try:
+            phys_ei = data['room', 'physical_connects', 'room'].edge_index
+        except (KeyError, AttributeError):
+            return 0.5
+
+        try:
+            sight_ei = data['room', 'sight_lines', 'room'].edge_index
+        except (KeyError, AttributeError):
+            sight_ei = torch.zeros(2, 0, dtype=torch.long)
+
+        # A classroom is "in south cluster" if it has a sight edge or
+        # is connected to another classroom that has sight via ≤1 hop
+        has_sight = torch.zeros(n_r, dtype=torch.bool)
+        if sight_ei.numel() > 0:
+            has_sight[sight_ei[0]] = True
+            has_sight[sight_ei[1]] = True
+
+        in_cluster = torch.zeros(n_r, dtype=torch.bool)
+        for ci in cls_idx:
+            if has_sight[ci]:
+                in_cluster[ci] = True
+            else:
+                # Check 1-hop neighbors for sight-connected classrooms
+                neighbors = phys_ei[1, phys_ei[0] == ci].tolist()
+                neighbors += phys_ei[0, phys_ei[1] == ci].tolist()
+                for nb in neighbors:
+                    if is_cls[nb] and has_sight[nb]:
+                        in_cluster[ci] = True
+                        break
+
+        return float(in_cluster[is_cls].float().mean().item())
+
+    # ─────────────────────────────────────────────────────────────────
     # Aggregation
     # ─────────────────────────────────────────────────────────────────
 
@@ -399,16 +609,17 @@ class QualityMetrics:
         'graph_robustness': 1.0,
         'path_redundancy': 1.0,
         'zone_cohesion': 1.0,
+        'stair_service_radius': 1.0,
+        'toilet_coverage': 1.0,
+        'local_evacuation_loop': 1.0,
+        'classroom_south_cluster': 1.0,
         'space_type_diversity': 0.5,
         'vertical_flow_balance': 0.5,
     }
 
     @classmethod
     def compute_all(cls, data) -> Dict[str, float]:
-        """Compute all active quality metrics from HeteroData.
-
-        Note: acoustic_comfort is computed but excluded from scoring.
-        """
+        """Compute all active quality metrics from HeteroData."""
         return {
             'daylight_quality': cls.daylight_quality(data),
             'acoustic_comfort': cls.acoustic_comfort(data),  # computed, not scored
@@ -417,6 +628,10 @@ class QualityMetrics:
             'graph_robustness': cls.graph_robustness(data),
             'path_redundancy': cls.path_redundancy(data),
             'zone_cohesion': cls.zone_cohesion(data),
+            'stair_service_radius': cls.stair_service_radius(data),
+            'toilet_coverage': cls.toilet_coverage(data),
+            'local_evacuation_loop': cls.local_evacuation_loop(data),
+            'classroom_south_cluster': cls.classroom_south_cluster(data),
             'space_type_diversity': cls.space_type_diversity(data),
             'vertical_flow_balance': cls.vertical_flow_balance(data),
         }

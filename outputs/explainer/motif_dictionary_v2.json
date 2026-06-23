@@ -1,0 +1,180 @@
+{
+  "version": "v0.4.0",
+  "num_subgraphs": 40,
+  "num_motifs": 6,
+  "target_metrics": [
+    "local_evacuation_loop",
+    "classroom_south_cluster",
+    "fire_safety_margin",
+    "overall_quality"
+  ],
+  "motifs": [
+    {
+      "motif_id": "MOTIF_01",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "special": 2.272727272727273,
+        "corridor": 10.5,
+        "staircase": 6.666666666666667,
+        "storage": 3.0833333333333335,
+        "entrance": 1.0,
+        "classroom": 13.416666666666666,
+        "teacher": 2.8333333333333335,
+        "toilet": 3.0,
+        "env": 5.0,
+        "music": 1.4
+      },
+      "frequency": 12,
+      "percentage": 0.3,
+      "avg_nodes": 48.8,
+      "related_constraints": [
+        "GB50016-2014 §5.5 消防",
+        "GB50099-2011 §7.3 声学",
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室13间, 走道10间, 楼梯间6间, env5间, 储藏室3间组成，平均10类房间、49个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    },
+    {
+      "motif_id": "MOTIF_02",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "corridor": 12.4,
+        "staircase": 9.2,
+        "toilet": 2.7,
+        "entrance": 1.0,
+        "classroom": 15.5,
+        "special": 2.8,
+        "teacher": 2.4,
+        "storage": 3.5,
+        "env": 5.0,
+        "music": 1.625
+      },
+      "frequency": 10,
+      "percentage": 0.2,
+      "avg_nodes": 55.8,
+      "related_constraints": [
+        "GB50016-2014 §5.5 消防",
+        "GB50099-2011 §7.3 声学",
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室15间, 走道12间, 楼梯间9间, env5间, 储藏室3间组成，平均10类房间、56个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    },
+    {
+      "motif_id": "MOTIF_03",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "special": 4.0,
+        "teacher": 5.333333333333333,
+        "corridor": 13.5,
+        "staircase": 8.333333333333334,
+        "toilet": 3.8333333333333335,
+        "storage": 5.666666666666667,
+        "entrance": 1.0,
+        "classroom": 23.0,
+        "music": 1.6666666666666667,
+        "env": 5.5
+      },
+      "frequency": 6,
+      "percentage": 0.1,
+      "avg_nodes": 71.8,
+      "related_constraints": [
+        "GB50016-2014 §5.5 消防",
+        "GB50099-2011 §7.3 声学",
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室23间, 走道13间, 楼梯间8间, 储藏室5间, env5间组成，平均10类房间、72个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    },
+    {
+      "motif_id": "MOTIF_04",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "special": 4.2,
+        "teacher": 6.2,
+        "corridor": 15.0,
+        "staircase": 8.0,
+        "toilet": 4.8,
+        "storage": 6.6,
+        "entrance": 1.0,
+        "classroom": 29.8,
+        "music": 2.6,
+        "env": 6.0
+      },
+      "frequency": 5,
+      "percentage": 0.1,
+      "avg_nodes": 84.2,
+      "related_constraints": [
+        "GB50016-2014 §5.5 消防",
+        "GB50099-2011 §7.3 声学",
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室29间, 走道15间, 楼梯间8间, 储藏室6间, teacher6间组成，平均10类房间、84个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    },
+    {
+      "motif_id": "MOTIF_05",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "special": 3.0,
+        "teacher": 3.3333333333333335,
+        "corridor": 10.0,
+        "staircase": 6.0,
+        "toilet": 1.6666666666666667,
+        "storage": 4.0,
+        "entrance": 1.0,
+        "classroom": 14.0,
+        "music": 1.3333333333333333,
+        "env": 5.0
+      },
+      "frequency": 3,
+      "percentage": 0.1,
+      "avg_nodes": 49.3,
+      "related_constraints": [
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5 消防",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室14间, 走道10间, 楼梯间6间, env5间, 储藏室4间组成，平均10类房间、49个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    },
+    {
+      "motif_id": "MOTIF_06",
+      "name": "教学翼标准模体",
+      "name_cn": "",
+      "room_composition": {
+        "special": 3.5,
+        "teacher": 6.5,
+        "corridor": 15.0,
+        "staircase": 8.0,
+        "storage": 8.0,
+        "entrance": 1.0,
+        "classroom": 24.0,
+        "music": 2.0,
+        "toilet": 5.0,
+        "env": 6.0
+      },
+      "frequency": 2,
+      "percentage": 0.1,
+      "avg_nodes": 79.0,
+      "related_constraints": [
+        "GB50016-2014 §5.5 消防",
+        "GB50099-2011 §7.3 声学",
+        "GB50099-2011 §5.1 采光",
+        "GB50099-2011 §8.2.3 走廊比",
+        "GB50016-2014 §5.5.17 疏散"
+      ],
+      "description": "该模体由普通教室24间, 走道15间, 楼梯间8间, 储藏室8间, teacher6间组成，平均10类房间、79个图节点。楼梯间作为垂直交通核，连接各标准层走廊，确保GB50016-2014 §5.5消防疏散路径畅通。普通教室沿南向布置并通过视线边连接日照节点，符合GB50099-2011 §5.1天然采光要求。"
+    }
+  ]
+}
